@@ -62,6 +62,7 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
 
   GB_check = new QCheckBox (tr ("GB"), this);
   GB_check->setCheckState (Qt::Checked);
+  GB_check->setEnabled(false);
   down->addWidget (GB_check);
 
   GBA_check = new QCheckBox (tr ("GBA"), this);
@@ -80,9 +81,11 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
   flash_size = 512;
 
 
-  connect (ctype_combo, SIGNAL (activated (int)), this, SLOT (setMbc (int)));
-  connect (roms_combo, SIGNAL (activated (int)), this, SLOT (setFlash (int)));
-  connect (memty_combo, SIGNAL (activated (int)), this, SLOT (setRam (int)));
+  //connect (ctype_combo, SIGNAL (activated (int)), this, SLOT (setMbc (int)));
+  //connect (roms_combo, SIGNAL (activated (int)), this, SLOT (setFlash (int)));
+  //connect (memty_combo, SIGNAL (activated (int)), this, SLOT (setRam (int)));
+  connect(GBA_check, &QPushButton::clicked, this, &Settings::gbaToggled);
+  connect(GB_check, &QPushButton::clicked, this, &Settings::gbToggled);
 
 }
 
@@ -115,6 +118,12 @@ Settings::setRam (int index)
       break;
     }
 
+}
+
+void
+Settings::setMbc (int)
+{
+  //emit refresh_ram_buttons ();
 }
 
 //fill ram_combo depending on cart type
@@ -163,4 +172,24 @@ Settings::setAuto (int state)
     auto_size = 1;
   else
     auto_size = 0;
+}
+
+void
+Settings::gbToggled ()
+{
+    if(GB_check->checkState() == Qt::Checked){
+        GBA_check->setEnabled(true);
+        GB_check->setEnabled(false);
+        GBA_check->setCheckState(Qt::Unchecked);
+    }
+}
+
+void
+Settings::gbaToggled ()
+{
+    if(GBA_check->checkState() == Qt::Checked){
+        GB_check->setEnabled(true);
+        GBA_check->setEnabled(false);
+        GB_check->setCheckState(Qt::Unchecked);
+    }
 }

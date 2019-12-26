@@ -11,7 +11,7 @@ class Console:public QTextEdit
 public:
   Console (QWidget * parent):QTextEdit (parent)
   {
-    this->setMinimumWidth (400);
+    this->setMinimumWidth (300);
     this->setReadOnly (true);
     QPalette palette;
       palette.setColor (QPalette::Base, QColor (0, 0, 0));
@@ -24,6 +24,14 @@ public:
   void print (QString string)
   {
     append (string);
+  }
+
+  void samePrint (QString string)
+  {
+      QTextCursor prev_cursor = this->textCursor();
+      this->moveCursor (QTextCursor::End);
+      this->insertPlainText(string);
+      this->setTextCursor(prev_cursor);
   }
 
   void line ()

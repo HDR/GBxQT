@@ -32,7 +32,6 @@ class Settings:public QGroupBox
   QVBoxLayout *all;
 
 
-
 public:
   static bool commanual;
   static bool showbbl;
@@ -75,13 +74,17 @@ public:
   }
 
   void ram_types (int type);
-  void flash_types (int type);
+  void flash_types (int type, double newParameter = 2.0);
 
-  public slots:
+
+  void flash_types(int type);
+public slots:
   void setMbc (int mbc_nr);
   void setFlash (int index);
   void setRam (int index);
   void setAuto (int state);
+  void gbToggled ();
+  void gbaToggled ();
 signals:
   void refresh_ram_buttons ();
 
