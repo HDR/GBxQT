@@ -15,12 +15,7 @@ parse_params (int /*argc*/, char *argv[])
 {
   while (*++argv)
     {
-/* disable auto com search in windows */
-      if (strcmp (*argv, "-commanual") == 0)
-    Settings::commanual = true;
-/*
- * Appearance settings
- */
+ // Appearance settings
       if (strcmp (*argv, "-darkmode") == 0)
     Settings::darkmode = true;
 

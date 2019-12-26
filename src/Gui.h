@@ -122,7 +122,7 @@ extern int bdrate;
 #define PCB_1_3 4
 
 // Common vars
-#define READ_BUFFER 0
+#define READ_BUFFER nullptr
 
 extern uint8_t gbxcartFirmwareVersion;
 extern uint8_t gbxcartPcbVersion;
@@ -150,7 +150,7 @@ class Gui:public QWidget
 {
   Q_OBJECT Settings * settings;
   Console *console;
-  Device * device;
+  Device *device;
   QGridLayout *grid;
   QVBoxLayout *left;
   QVBoxLayout *right;
@@ -174,7 +174,7 @@ class Gui:public QWidget
 
 public:
     Gui (QWidget * parent = nullptr);
-  static int port_type;
+  int port_type;
 
 
   public slots:void startup_info (void);
@@ -188,17 +188,17 @@ public:
   void erase_flash (void);
   void erase_ram (void);
   void setProgress (int ile, int max);
-  static void read_config(void);
-  static void write_config(void);
+  void read_config(void);
+  void write_config(void);
   void load_cart_ram_info(void);
   void write_cart_ram_info(void);
   static void delay_ms(uint16_t ms);
-  static char read_one_letter(void);
+  char read_one_letter(void);
   void print_progress_percent(uint32_t bytesRead, uint32_t hashNumber);
   void com_wait_for_ack (void);
   void com_read_stop(void);
   void com_read_cont(void);
-  static uint8_t com_test_port(void);
+  uint8_t com_test_port(void);
   uint8_t com_read_bytes(FILE *file, int count);
   void com_write_bytes_from_file(uint8_t command, FILE *file, int count);
   static void set_mode (char command);

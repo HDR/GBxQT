@@ -150,17 +150,10 @@ Gui::startup_info (void)
 {
     read_config();
 
-    // Open COM port
     if (Gui::com_test_port() == 1) {
        device->com_label->setText("Port: COM" + QString::number(cport_nr+1));
-
-        // Break out of any existing functions on ATmega
         Gui::set_mode('0');
-
-        // Get cartridge mode - Gameboy or Gameboy Advance
         cartridgeMode = Gui::request_value(CART_MODE);
-
-        // Get PCB version
         gbxcartPcbVersion = Gui::request_value(READ_PCB_VERSION);
         if (gbxcartPcbVersion == 1){
             device->pcb_label->setText("PCB Version: 1.0");
@@ -171,10 +164,9 @@ Gui::startup_info (void)
         if (gbxcartPcbVersion == 4){
             device->pcb_label->setText("PCB Version: 1.3");
         }
-
-        // Get firmware version
         gbxcartFirmwareVersion = Gui::request_value(READ_FIRMWARE_VERSION);
         device->firm_label->setText("Firmware Version: " + QString::number(gbxcartFirmwareVersion));
+        Gui::set_mode(VOLTAGE_3_3V);
     } else {
         Gui::read_one_letter();
     }
@@ -506,10 +498,10 @@ void Gui::com_write_bytes_from_file(uint8_t command, FILE *file, int count) {
     buffer[0] = command;
 
     if (file == nullptr) {
-        memcpy(&buffer[1], writeBuffer, count);
+        memcpy(&buffer[1], writeBuffer, size_t(count));
     }
     else {
-        fread(&buffer[1], 1, count, file);
+        fread(&buffer[1], 1, size_t(count), file);
     }
 
     RS232_SendBuf(cport_nr, buffer, (count + 1)); // command + 1-256 bytes
@@ -574,7 +566,7 @@ uint8_t Gui::read_cartridge_mode (void) {
 
 // Send 1 byte and read 1 byte
 uint8_t Gui::request_value (uint8_t command) {
-    set_mode(command);
+    set_mode(char(command));
 
     uint8_t buffer[2];
     uint8_t rxBytes = 0;
@@ -663,7 +655,7 @@ void Gui::read_gb_header (void) {
     }
     // Read cartridge title and check for non-printable text
     for (uint16_t titleAddress = 0x0134; titleAddress <= 0x143; titleAddress++) {
-        char headerChar = startRomBuffer[titleAddress];
+        char headerChar = char(startRomBuffer[titleAddress]);
         if ((headerChar >= 0x30 && headerChar <= 0x57) || // 0-9
              (headerChar >= 0x41 && headerChar <= 0x5A) || // A-Z
              (headerChar >= 0x61 && headerChar <= 0x7A) || // a-z
@@ -851,7 +843,6 @@ uint8_t Gui::gba_check_rom_size (void) {
 // the original byte back to how it was. This can be a destructive process to the first byte, if anything goes wrong the user
 // could lose the first byte, so we only do this check when writing a save back to the SRAM/Flash.
 uint8_t Gui::gba_test_sram_flash_write (void) {
-    console->print("Testing for SRAM or Flash presence... ");
 
     // Save the 1 byte first to buffer
     uint8_t saveBuffer[65];
@@ -886,7 +877,6 @@ uint8_t Gui::gba_test_sram_flash_write (void) {
 
     // Verify
     if (readBackBuffer[0] == testNumber) {
-        console->print("SRAM found\n");
 
         // Write the byte back to how it was
         set_number(0x0000, SET_START_ADDRESS);
@@ -899,7 +889,6 @@ uint8_t Gui::gba_test_sram_flash_write (void) {
         return NO_FLASH;
     }
     else { // Flash likely present, test by reading the flash ID
-        console->print("Flash found\n");
 
         set_mode(GBA_FLASH_READ_ID); // Read Flash ID and exit Flash ID mode
 
@@ -1071,13 +1060,13 @@ uint8_t Gui::gba_check_sram_flash (void) {
     char firstBuffer[65];
     char secondBuffer[65];
     for (uint8_t x = 0; x < 32; x++) {
-        set_number((uint32_t) (x * 0x400), SET_START_ADDRESS);
+        set_number(uint32_t ((x * 0x400)), SET_START_ADDRESS);
         set_mode(GBA_READ_SRAM);
         com_read_bytes(READ_BUFFER, 64);
         memcpy(&firstBuffer, readBuffer, 64);
         com_read_stop();
 
-        set_number((uint32_t) (x * 0x400) + 0x8000, SET_START_ADDRESS);
+        set_number(uint32_t ((x * 0x400) + 0x8000), SET_START_ADDRESS);
         set_mode(GBA_READ_SRAM);
         com_read_bytes(READ_BUFFER, 64);
         memcpy(&secondBuffer, readBuffer, 64);
@@ -1114,7 +1103,7 @@ uint8_t Gui::gba_check_sram_flash (void) {
         console->print("Testing for 512Kbit or 1Mbit Flash... ");
         for (uint8_t x = 0; x < 32; x++) {
             // Read bank 0
-            set_number((uint32_t) (x * 0x400), SET_START_ADDRESS);
+            set_number(uint32_t ((x * 0x400)), SET_START_ADDRESS);
             set_mode(GBA_READ_SRAM);
             com_read_bytes(READ_BUFFER, 64);
             memcpy(&firstBuffer, readBuffer, 64);
@@ -1123,7 +1112,7 @@ uint8_t Gui::gba_check_sram_flash (void) {
             // Read bank 1
             set_number(1, GBA_FLASH_SET_BANK); // Set bank 1
 
-            set_number((uint32_t) (x * 0x400), SET_START_ADDRESS);
+            set_number(uint32_t ((x * 0x400)), SET_START_ADDRESS);
             set_mode(GBA_READ_SRAM);
             com_read_bytes(READ_BUFFER, 64);
             memcpy(&secondBuffer, readBuffer, 64);
@@ -1289,7 +1278,7 @@ void Gui::gba_read_gametitle(void) {
     }
     // Read cartridge title and check for non-printable text
     for (uint16_t titleAddress = 0xA0; titleAddress <= 0xAB; titleAddress++) {
-        char headerChar = startRomBuffer[titleAddress];
+        char headerChar = char(startRomBuffer[titleAddress]);
         if ((headerChar >= 0x30 && headerChar <= 0x57) || // 0-9
              (headerChar >= 0x41 && headerChar <= 0x5A) || // A-Z
              (headerChar >= 0x61 && headerChar <= 0x7A) || // a-z
@@ -1330,7 +1319,7 @@ void Gui::read_gba_header (void) {
     }
     // Read cartridge title and check for non-printable text
     for (uint16_t titleAddress = 0xA0; titleAddress <= 0xAB; titleAddress++) {
-        char headerChar = startRomBuffer[titleAddress];
+        char headerChar = char(startRomBuffer[titleAddress]);
         if ((headerChar >= 0x30 && headerChar <= 0x57) || // 0-9
              (headerChar >= 0x41 && headerChar <= 0x5A) || // A-Z
              (headerChar >= 0x61 && headerChar <= 0x7A) || // a-z
@@ -1362,18 +1351,11 @@ void Gui::read_gba_header (void) {
         console->print("Logo check: Failed");
     }
 
-
-    // ROM size
-    //console->print("Calculating ROM size");
     romSize = gba_check_rom_size();
-
-    // EEPROM check
-    //console->print("Checking for EEPROM");
     eepromSize = gba_check_eeprom();
 
     // SRAM/Flash check/size, if no EEPROM present
     if (eepromSize == 0) {
-        //console->print("Calculating SRAM/Flash size");
         ramSize = gba_check_sram_flash();
     }
     else {
@@ -1520,7 +1502,7 @@ void Gui::wait_for_flash_chip_erase_ff(uint8_t printProgress) {
 
         if (printProgress == 1) {
             //console->print(".");
-            console->print("0x" + readBuffer[0]);
+            console->print("0x" + QString::number(readBuffer[0]));
             fflush(stdout);
         }
 
@@ -1656,7 +1638,7 @@ void Gui::gb_check_change_flash_id (uint8_t flashMethod) {
     com_read_bytes(READ_BUFFER, 64);
     com_read_stop(); // End read
 
-    console->print("Flash ID: " + readBuffer[0] + readBuffer[1] + readBuffer[2] + readBuffer[3]);
+    console->print("Flash ID: " + QString::number(readBuffer[0] + readBuffer[1] + readBuffer[2] + readBuffer[3]));
 
     // Check if ROM read is different to Flash ID
     uint8_t resultChanged = 0;

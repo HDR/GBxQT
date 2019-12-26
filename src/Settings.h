@@ -9,6 +9,7 @@
 #include <QCheckBox>
 #include <QThread>
 #include "const.h"
+#include "Console.h"
 
 class Settings:public QGroupBox
 {
@@ -33,8 +34,6 @@ class Settings:public QGroupBox
 
 
 public:
-  static bool commanual;
-  static bool showbbl;
   static bool darkmode;
   static QThread::Priority priority;
 

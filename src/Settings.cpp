@@ -7,10 +7,7 @@
 #include "Gui.h"
 #include <math.h>
 
-bool
-  Settings::commanual = 0;
-bool
-  Settings::darkmode = 0;
+bool Settings::darkmode = 0;
 QThread::Priority Settings::priority = QThread::NormalPriority;
 
 Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
@@ -23,7 +20,6 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
   down = new QHBoxLayout ();
   north = new QHBoxLayout ();
   all = new QVBoxLayout ();
-
   ctype_label = new QLabel ("Cartridge Type:", this);
 
   labels->addWidget (ctype_label);
@@ -61,12 +57,12 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
   rsize_combo->setCurrentIndex (0);
 
   GB_check = new QCheckBox (tr ("GB"), this);
-  GB_check->setCheckState (Qt::Checked);
-  GB_check->setEnabled(false);
+  GB_check->setCheckState (Qt::Unchecked);
   down->addWidget (GB_check);
 
   GBA_check = new QCheckBox (tr ("GBA"), this);
-  GBA_check->setCheckState (Qt::Unchecked);
+  GBA_check->setCheckState (Qt::Checked);
+  GBA_check->setEnabled(false);
   down->addWidget (GBA_check);
 
 
@@ -93,7 +89,7 @@ void
 Settings::setFlash (int index)
 {
   /* size = 32 * 2 ^ index */
-  flash_size = 32 * (int) pow (2.0, (double) index);
+  flash_size = 32 * int( pow (2.0, double(index)));
 }
 
 void
@@ -160,7 +156,7 @@ Settings::flash_types (int type)
 
   for (int i = 0; i <= type; i++)
     {
-      int pojemnosc = 32 * (int) pow (2.0, (double) i);
+      int pojemnosc = 32 * int( pow (2.0, double(i)));
       roms_combo->insertItem (i, QString::number (pojemnosc) + " KB");
     }
 }
@@ -178,6 +174,7 @@ void
 Settings::gbToggled ()
 {
     if(GB_check->checkState() == Qt::Checked){
+        Gui::set_mode(VOLTAGE_5V);
         GBA_check->setEnabled(true);
         GB_check->setEnabled(false);
         GBA_check->setCheckState(Qt::Unchecked);
@@ -188,6 +185,7 @@ void
 Settings::gbaToggled ()
 {
     if(GBA_check->checkState() == Qt::Checked){
+        Gui::set_mode(VOLTAGE_3_3V);
         GB_check->setEnabled(true);
         GBA_check->setEnabled(false);
         GB_check->setCheckState(Qt::Unchecked);
