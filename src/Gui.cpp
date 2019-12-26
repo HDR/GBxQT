@@ -175,7 +175,13 @@ Gui::startup_info (void)
 void
 Gui::show_info ()
 {
-    read_gba_header();
+    if(request_value(CART_MODE) == 2){
+        read_gba_header();
+    }
+
+    if(request_value(CART_MODE) == 1){
+        read_gb_header();
+    }
 }
 
 
@@ -696,80 +702,80 @@ void Gui::read_gb_header (void) {
 
     console->print("MBC type: ");
     switch (cartridgeType) {
-        case 0: console->print("ROM ONLY\n"); break;
-        case 1: console->print("MBC1\n"); break;
-        case 2: console->print("MBC1+RAM\n"); break;
-        case 3: console->print("MBC1+RAM+BATTERY\n"); break;
-        case 5: console->print("MBC2\n"); break;
-        case 6: console->print("MBC2+BATTERY\n"); break;
-        case 8: console->print("ROM+RAM\n"); break;
-        case 9: console->print("ROM ONLY\n"); break;
-        case 11: console->print("MMM01\n"); break;
-        case 12: console->print("MMM01+RAM\n"); break;
-        case 13: console->print("MMM01+RAM+BATTERY\n"); break;
-        case 15: console->print("MBC3+TIMER+BATTERY\n"); break;
-        case 16: console->print("MBC3+TIMER+RAM+BATTERY\n"); break;
-        case 17: console->print("MBC3\n"); break;
-        case 18: console->print("MBC3+RAM\n"); break;
-        case 19: console->print("MBC3+RAM+BATTERY\n"); break;
-        case 21: console->print("MBC4\n"); break;
-        case 22: console->print("MBC4+RAM\n"); break;
-        case 23: console->print("MBC4+RAM+BATTERY\n"); break;
-        case 25: console->print("MBC5\n"); break;
-        case 26: console->print("MBC5+RAM\n"); break;
-        case 27: console->print("MBC5+RAM+BATTERY\n"); break;
-        case 28: console->print("MBC5+RUMBLE\n"); break;
-        case 29: console->print("MBC5+RUMBLE+RAM\n"); break;
-        case 30: console->print("MBC5+RUMBLE+RAM+BATTERY\n"); break;
-        case 252: console->print("Gameboy Camera\n"); break;
-        default: console->print("Not found\n");
+        case 0: console->samePrint("ROM ONLY"); break;
+        case 1: console->samePrint("MBC1"); break;
+        case 2: console->samePrint("MBC1+RAM"); break;
+        case 3: console->samePrint("MBC1+RAM+BATTERY"); break;
+        case 5: console->samePrint("MBC2"); break;
+        case 6: console->samePrint("MBC2+BATTERY"); break;
+        case 8: console->samePrint("ROM+RAM"); break;
+        case 9: console->samePrint("ROM ONLY"); break;
+        case 11: console->samePrint("MMM01"); break;
+        case 12: console->samePrint("MMM01+RAM"); break;
+        case 13: console->samePrint("MMM01+RAM+BATTERY"); break;
+        case 15: console->samePrint("MBC3+TIMER+BATTERY"); break;
+        case 16: console->samePrint("MBC3+TIMER+RAM+BATTERY"); break;
+        case 17: console->samePrint("MBC3"); break;
+        case 18: console->samePrint("MBC3+RAM"); break;
+        case 19: console->samePrint("MBC3+RAM+BATTERY"); break;
+        case 21: console->samePrint("MBC4"); break;
+        case 22: console->samePrint("MBC4+RAM"); break;
+        case 23: console->samePrint("MBC4+RAM+BATTERY"); break;
+        case 25: console->samePrint("MBC5"); break;
+        case 26: console->samePrint("MBC5+RAM"); break;
+        case 27: console->samePrint("MBC5+RAM+BATTERY"); break;
+        case 28: console->samePrint("MBC5+RUMBLE"); break;
+        case 29: console->samePrint("MBC5+RUMBLE+RAM"); break;
+        case 30: console->samePrint("MBC5+RUMBLE+RAM+BATTERY"); break;
+        case 252: console->samePrint("Gameboy Camera"); break;
+        default: console->samePrint("Not found");
     }
 
     console->print("ROM size: ");
     switch (romSize) {
-        case 0: console->print("32KByte (no ROM banking)\n"); break;
-        case 1: console->print("64KByte (4 banks)\n"); break;
-        case 2: console->print("128KByte (8 banks)\n"); break;
-        case 3: console->print("256KByte (16 banks)\n"); break;
-        case 4: console->print("512KByte (32 banks)\n"); break;
+        case 0: console->samePrint("32KByte (no ROM banking)"); break;
+        case 1: console->samePrint("64KByte (4 banks)"); break;
+        case 2: console->samePrint("128KByte (8 banks)"); break;
+        case 3: console->samePrint("256KByte (16 banks)"); break;
+        case 4: console->samePrint("512KByte (32 banks)"); break;
         case 5:
             if (cartridgeType == 1 || cartridgeType == 2 || cartridgeType == 3) {
-                console->print("1MByte (63 banks)\n");
+                console->samePrint("1MByte (63 banks)");
             }
             else {
-                console->print("1MByte (64 banks)\n");
+                console->samePrint("1MByte (64 banks)");
             }
             break;
         case 6:
             if (cartridgeType == 1 || cartridgeType == 2 || cartridgeType == 3) {
-                console->print("2MByte (125 banks)\n");
+                console->samePrint("2MByte (125 banks)");
             }
             else {
-                console->print("2MByte (128 banks)\n");
+                console->samePrint("2MByte (128 banks)");
             }
             break;
-        case 7: console->print("4MByte (256 banks)\n"); break;
-        case 82: console->print("1.1MByte (72 banks)\n"); break;
-        case 83: console->print("1.2MByte (80 banks)\n"); break;
-        case 84: console->print("1.5MByte (96 banks)\n"); break;
-        default: console->print("Not found\n");
+        case 7: console->samePrint("4MByte (256 banks)"); break;
+        case 82: console->samePrint("1.1MByte (72 banks)"); break;
+        case 83: console->samePrint("1.2MByte (80 banks)"); break;
+        case 84: console->samePrint("1.5MByte (96 banks)"); break;
+        default: console->samePrint("Not found");
     }
 
     console->print("RAM size: ");
     switch (ramSize) {
         case 0:
             if (cartridgeType == 6) {
-                console->print("512 bytes (nibbles)\n");
+                console->samePrint("512 bytes (nibbles)");
             }
             else {
-                console->print("None\n");
+                console->samePrint("None");
             }
             break;
-        case 1: console->print("2 KBytes\n"); break;
-        case 2: console->print("8 KBytes\n"); break;
-        case 3: console->print("32 KBytes (4 banks of 8Kbytes)\n"); break;
-        case 4: console->print("128 KBytes (16 banks of 8Kbytes)\n"); break;
-        default: console->print("Not found\n");
+        case 1: console->samePrint("2 KBytes"); break;
+        case 2: console->samePrint("8 KBytes"); break;
+        case 3: console->samePrint("32 KBytes (4 banks of 8Kbytes)"); break;
+        case 4: console->samePrint("128 KBytes (16 banks of 8Kbytes)"); break;
+        default: console->samePrint("Not found");
     }
 
     // Nintendo Logo Check
