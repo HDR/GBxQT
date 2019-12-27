@@ -22,10 +22,16 @@ class Settings:public QGroupBox
   QComboBox *roms_combo;
   QComboBox *memty_combo;
   QComboBox *rsize_combo;
+  QComboBox *fct_combo;
+  QComboBox *pcb_combo;
+  QComboBox *we_combo;
   QLabel *ctype_label;
   QLabel *roms_label;
   QLabel *memty_label;
   QLabel *rsize_label;
+  QLabel *fct_label;
+  QLabel *pcb_label;
+  QLabel *we_label;
   QCheckBox *GB_check;
   QCheckBox *GBA_check;
   QVBoxLayout *labels, *combo_boxes;
@@ -72,15 +78,15 @@ public:
     return (memty_combo->currentText () == "");
   }
 
-  void ram_types (int type);
+  void setRAsize (int type);
   void flash_types (int type, double newParameter = 2.0);
 
 
   void flash_types(int type);
 public slots:
-  void setMbc (int mbc_nr);
-  void setFlash (int index);
-  void setRam (int index);
+  void setCtype (int index);
+  void setRsize (int index);
+  void setMsize (int index);
   void setAuto (int state);
   void gbToggled ();
   void gbaToggled ();
