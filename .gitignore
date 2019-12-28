@@ -1,5 +1,5 @@
 build/
-GBxQT.pro.user
+*.user
 GBxQT.pro.user.*
 *.gb
 *.gbc
