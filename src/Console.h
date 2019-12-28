@@ -5,6 +5,7 @@
 #include <QString>
 #include <QPalette>
 #include <QColor>
+#include "const.h"
 
 class Console:public QTextEdit
 {
@@ -37,6 +38,13 @@ public:
   void line ()
   {
     print ("<hr><br>");
+  }
+
+  void clearConsole ()
+  {
+      this->clear();
+      this->print (tr ("GBxQT version ") + VER + tr (" started."));
+      this->line();
   }
 };
 

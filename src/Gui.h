@@ -6,13 +6,13 @@
 #include <QString>
 #include <QNetworkAccessManager>
 #include <QProcess>
-#include <QWinTaskbarButton>
 #include "Settings.h"
 #include "Device.h"
 #include "Console.h"
 
 #ifdef _WIN32
 #include <windows.h>
+#include <QWinTaskbarButton>
 #else
 #include <unistd.h>
 #endif
@@ -25,8 +25,9 @@
 #define false 0
 #define true 1
 
-// COM Port settings (default)
 #include "rs232/rs232.h"
+
+#include "ReadFlashThread.h"
 extern int cport_nr;
 extern int bdrate;
 
@@ -156,8 +157,9 @@ class Gui:public QWidget
   QVBoxLayout *right;
   QVBoxLayout *center;
   QHBoxLayout *down;
-  QProgressBar *progress;
-  QWinTaskbarButton *winTaskbar;
+  #if defined (_WIN32)
+    QWinTaskbarButton *winTaskbar;
+  #endif
   QLabel *image;
   QPixmap *logo;
   QPushButton *cancel_btn;
@@ -168,8 +170,13 @@ class Gui:public QWidget
   QPushButton *wram_btn;
   QPushButton *eflash_btn;
   QPushButton *eram_btn;
-  QString file_name;
+  //WriteFlashThread *thread_WFLA;
+  ReadFlashThread *thread_RFLA;
+  //EraseThread *thread_E;
+  //ReadRamThread *thread_RRAM;
+  //WriteRamThread * thread_WRAM;
   QString path;
+  QString file_name;
 
 
 public:
@@ -177,6 +184,7 @@ public:
   int port_type;
 
 
+  QProgressBar *progress;
   public slots:void startup_info (void);
   void setEnabledButtons (bool stan);
   void setRamButtons ();
@@ -196,16 +204,16 @@ public:
   char read_one_letter(void);
   void print_progress_percent(uint32_t bytesRead, uint32_t hashNumber);
   void com_wait_for_ack (void);
-  void com_read_stop(void);
-  void com_read_cont(void);
+  static void com_read_stop(void);
+  static void com_read_cont(void);
   uint8_t com_test_port(void);
-  uint8_t com_read_bytes(FILE *file, int count);
+  static uint8_t com_read_bytes(FILE *file, int count);
   void com_write_bytes_from_file(uint8_t command, FILE *file, int count);
   static void set_mode (char command);
-  void set_number (uint32_t number, uint8_t command);
+  static void set_number (uint32_t number, uint8_t command);
   uint8_t read_cartridge_mode (void);
   static uint8_t request_value (uint8_t command);
-  void set_bank (uint16_t address, uint8_t bank);
+  static void set_bank (uint16_t address, uint8_t bank);
   void mbc2_fix (void);
   void read_gb_header (void);
   uint8_t gba_check_rom_size (void);
@@ -225,5 +233,7 @@ public:
   void gb_check_change_flash_id (uint8_t flashMethod);
   void gba_flash_write_address_byte (uint32_t address, uint16_t byte);
   void send_hex_wait_ack (uint16_t hex);
+  void read_rom();
+  void print_error (int err);
 };
 

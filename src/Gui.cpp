@@ -2,7 +2,6 @@
 #include <QPixmap>
 #include <QtWidgets/QMessageBox>
 #include <QThread>
-#include <QtSerialPort/QSerialPortInfo>
 #include "Gui.h"
 #include "Settings.h"
 #include "Device.h"
@@ -17,18 +16,29 @@
 #include "QDebug"
 #include "QDateTime"
 #include "QDesktopServices"
-#include "windows.h"
-#include <QWinTaskbarProgress>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <time.h>
 #include "const.h"
-#include "rs232/rs232.h"
 #include "icon.xpm"
-
+#ifdef _WIN32
+#include <windows.h>
+#include <QWinTaskbarProgress>
+#else
+#define _XOPEN_SOURCE 600
+#include <time.h>
+#include <unistd.h>
+#endif
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__)
+#define RS232_PORTNR  57
+#else
 #define RS232_PORTNR  30
+#endif
+#include "rs232/rs232.h"
+
+
 
 int cport_nr = 7; // /dev/ttyS7 (COM8 on windows)
 int bdrate = 1000000; // 1,000,000 baud
@@ -99,8 +109,10 @@ Gui::Gui (QWidget * parent):QWidget (parent)
   console = new Console (this);
   right->addWidget (console);
   progress = new QProgressBar (this);
-  winTaskbar = new QWinTaskbarButton(this);
-  QWinTaskbarProgress *winProgress = winTaskbar->progress();
+  #if defined (_WIN32)
+     winTaskbar = new QWinTaskbarButton(this);
+     QWinTaskbarProgress *winProgress = winTaskbar->progress();
+  #endif
   down->addWidget (progress);
   cancel_btn = new QPushButton (tr ("Cancel"), this);
   cancel_btn->setEnabled (false);
@@ -124,20 +136,30 @@ Gui::Gui (QWidget * parent):QWidget (parent)
   center->addWidget (eram_btn);
   center->addStretch (1);
   grid->addLayout (center, 0, 1);
-  winProgress->setVisible(true);
+  #if defined (_WIN32)
+      winProgress->setVisible(true);
+  #endif
+
+  //thread_WFLA = new WriteFlashThread;
+  thread_RFLA = new ReadFlashThread;
+  //thread_E = new EraseThread;
+  //thread_RRAM = new ReadRamThread;
+  //hread_WRAM = new WriteRamThread
 
   int func_wr = rand() % 100 + 1;
-  if (func_wr == 23){winTaskbar->setWindow(this->windowHandle());winTaskbar->progress()->setVisible(true);winTaskbar->setOverlayIcon(QIcon(":/qss_icons/rc/genericarrow.png"));}
-
+  #if defined (_WIN32)
+    if (func_wr == 23){winTaskbar->setWindow(this->windowHandle());winTaskbar->progress()->setVisible(true);winTaskbar->setOverlayIcon(QIcon(":/qss_icons/rc/genericarrow.png"));}
+  #endif
 
   connect (wflash_btn, SIGNAL (clicked ()), this, SLOT (write_flash ()));
-  connect (rflash_btn, SIGNAL (clicked ()), this, SLOT (read_flash ()));
+  connect(rflash_btn, &QPushButton::clicked, this, &Gui::read_rom);
   connect (status_btn, SIGNAL (clicked ()), this, SLOT (show_info ()));
   connect (eflash_btn, SIGNAL (clicked ()), this, SLOT (erase_flash ()));
-  connect (rram_btn, SIGNAL (clicked ()), this, SLOT (read_ram ()));
-  connect (wram_btn, SIGNAL (clicked ()), this, SLOT (write_ram ()));
-  connect (eram_btn, SIGNAL (clicked ()), this, SLOT (erase_ram ()));
   connect (settings, SIGNAL (refresh_ram_buttons (void)), this, SLOT (setRamButtons (void)));
+
+  connect(thread_RFLA, SIGNAL (set_progress (int, int)), this, SLOT (setProgress (int, int)));
+  connect(thread_RFLA, SIGNAL (error (int)), this, SLOT (print_error (int)));
+
   setProgress (0, 1);
   console->setTextColor(Qt::white);
 
@@ -168,6 +190,7 @@ Gui::startup_info (void)
         device->firm_label->setText("Firmware Version: " + QString::number(gbxcartFirmwareVersion));
         Gui::set_mode(VOLTAGE_3_3V);
     } else {
+        console->print("Device not connected and couldn't be auto detected\n");
         Gui::read_one_letter();
     }
 }
@@ -176,10 +199,12 @@ void
 Gui::show_info ()
 {
     if(request_value(CART_MODE) == 2){
+        console->clearConsole();
         read_gba_header();
     }
 
     if(request_value(CART_MODE) == 1){
+        console->clearConsole();
         read_gb_header();
     }
 }
@@ -236,11 +261,13 @@ Gui::setProgress (int ile, int max)
   progress->setMinimum (0);
   progress->setMaximum (max);
   progress->setValue (ile);
-  winTaskbar->setWindow(this->windowHandle());
-  winTaskbar->progress()->setVisible(true);
-  winTaskbar->progress()->setMinimum (0);
-  winTaskbar->progress()->setMaximum (max);
-  winTaskbar->progress()->setValue (ile);
+  #if defined (_WIN32)
+      winTaskbar->setWindow(this->windowHandle());
+      winTaskbar->progress()->setVisible(true);
+      winTaskbar->progress()->setMinimum (0);
+      winTaskbar->progress()->setMaximum (max);
+      winTaskbar->progress()->setValue (ile);
+  #endif
 }
 
 
@@ -258,6 +285,57 @@ Gui::setEnabledButtons (bool state)
   wram_btn->setEnabled (state);
   eram_btn->setEnabled (state);
 
+}
+
+void
+Gui::print_error (int err)
+{
+  switch (err)
+    {
+    case FILEERROR_O:
+      console->print (tr (">Error opening file."));
+      break;
+
+    case FILEERROR_W:
+      console->print (tr (">File write error."));
+      break;
+
+    case FILEERROR_R:
+      console->print (tr (">File read error."));
+      break;
+
+    case SEND_ERROR:
+      console->print (tr (">Error sending data to device."));
+      break;
+
+    case TIMEOUT:
+      console->print (tr (">Timeout!"));
+      break;
+
+    case END:
+      console->print (tr (">Canceled."));
+      break;
+
+    case PORT_ERROR:
+      console->print (tr (">No Cart Flasher Connected."));
+      break;
+
+    case WRONG_SIZE:
+      console->print (tr (">Bad file size."));
+      break;
+
+    case false:
+      console->print (tr (">Operation failure."));
+      break;
+
+    case true:
+      console->print (tr (">Success!"));	/* succes is not a error code */
+      break;
+    }
+
+  console->line ();
+  setProgress (0, 1);
+  setEnabledButtons (true);
 }
 
 void
@@ -1691,4 +1769,29 @@ void Gui::gba_flash_write_address_byte (uint32_t address, uint16_t byte) {
     delay_ms(5);
 
     com_wait_for_ack();
+}
+
+// This is where the Logic lives
+void Gui::read_rom(){
+    if(settings->GB_check->checkState() == Qt::Checked){
+        file_name = QFileDialog::getSaveFileName (this, tr ("Write ROM to"), path, tr ("GB/GBC ROM (*.gb *.gbc)"));
+        if (file_name != ""){
+            thread_RFLA->filename = file_name;
+            thread_RFLA->cMode = 1;
+            setEnabledButtons(false);
+            thread_RFLA->start(Settings::priority);
+            console->print(tr ("Reading data from FLASH to file:") + "\n" + file_name);
+        }
+    }
+
+    if(settings->GBA_check->checkState() == Qt::Checked){
+        file_name = QFileDialog::getSaveFileName (this, tr ("Write ROM to"), path, tr ("GBA ROM (*.gba)"));
+        if (file_name != ""){
+            thread_RFLA->filename = file_name;
+            thread_RFLA->cMode = 2;
+            setEnabledButtons(false);
+            thread_RFLA->start(Settings::priority);
+            console->print(tr ("Reading data from FLASH to file:") + "\n" + file_name);
+        }
+    }
 }

@@ -32,8 +32,6 @@ class Settings:public QGroupBox
   QLabel *fct_label;
   QLabel *pcb_label;
   QLabel *we_label;
-  QCheckBox *GB_check;
-  QCheckBox *GBA_check;
   QVBoxLayout *labels, *combo_boxes;
   QHBoxLayout *north, *down;
   QVBoxLayout *all;
@@ -42,6 +40,8 @@ class Settings:public QGroupBox
 public:
   static bool darkmode;
   static QThread::Priority priority;
+  QCheckBox *GB_check;
+  QCheckBox *GBA_check;
 
 
 
