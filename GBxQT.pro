@@ -17,10 +17,10 @@ RESOURCES += qdarkstyle/style.qrc
 
 # Input
 HEADERS += \
-           readflashthread.h \
            src/Console.h \
            src/Device.h \
            src/ReadFlashThread.h \
+           src/ReadRamThread.h \
            src/const.h \
            src/Gui.h \
            src/Settings.h \
@@ -31,6 +31,7 @@ SOURCES += \
            src/GBxQT.cpp \
            src/Gui.cpp \
            src/ReadFlashThread.cpp \
+           src/ReadRamThread.cpp \
            src/Settings.cpp \
            src/rs232/rs232.c
 RC_FILE = src/res.rc

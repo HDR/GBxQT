@@ -1,11 +1,11 @@
-#ifndef FL_READFLASHTHREAD_H_
-#define FL_READFLASHTHREAD_H_
+#ifndef FL_READRAMTHREAD_H_
+#define FL_READRAMTHREAD_H_
 #include <QThread>
 
-class ReadFlashThread:public QThread
+class ReadRamThread:public QThread
 {
 Q_OBJECT public:
-  ReadFlashThread (){}
+  ReadRamThread (){}
   virtual void run ();
   bool end;
   QString filename;

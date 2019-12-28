@@ -1,14 +1,11 @@
 #include "ReadFlashThread.h"
-#include "Settings.h"
 #include "const.h"
 #include <QFileDialog>
 #include <stdio.h>
 #include "Gui.h"
 
 
-void
-ReadFlashThread::run ()
-{
+void ReadFlashThread::run(){
     end = false;
     Gui::set_mode('0');
     FILE *romFile = fopen(filename.toLatin1(), "wb");
@@ -17,20 +14,20 @@ ReadFlashThread::run ()
         currAddr = 0x0000;
         endAddr = 0x7FFF;
         for (uint16_t bank =1; bank < romBanks; bank++){
-            if (cartridgeType >= 5) { // MBC2 and above
+            if (cartridgeType >= 5) {
                 Gui::set_bank(0x2100, bank);
                 if (bank >= 256) {Gui::set_bank(0x3000, 1);}
             }
             else {
-                if ((strncmp(gameTitle, "MOMOCOL", 7) == 0) || (strncmp(gameTitle, "BOMCOL", 6) == 0)) { // MBC1 Hudson
+                if ((strncmp(gameTitle, "MOMOCOL", 7) == 0) || (strncmp(gameTitle, "BOMCOL", 6) == 0)) {
                     Gui::set_bank(0x4000, bank >> 4);
                     if (bank < 10) {Gui::set_bank(0x2000, bank & 0x1F);}
                     else {Gui::set_bank(0x2000, 0x10 | (bank & 0x1F));}
                 }
                 else {
-                    Gui::set_bank(0x6000, 0); // Set ROM Mode
-                    Gui::set_bank(0x4000, bank >> 5); // Set bits 5 & 6 (01100000) of ROM bank
-                    Gui::set_bank(0x2000, bank & 0x1F); // Set bits 0 & 4 (00011111) of ROM bank
+                    Gui::set_bank(0x6000, 0);
+                    Gui::set_bank(0x4000, bank >> 5);
+                    Gui::set_bank(0x2000, bank & 0x1F);
                 }
             }
             if (bank > 1) { currAddr = 0x4000; }
@@ -103,5 +100,4 @@ ReadFlashThread::run ()
     emit error (true);
 }
 
-void
-ReadFlashThread::canceled (void){end = true;}
+void ReadFlashThread::canceled (void){end = true;}
