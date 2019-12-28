@@ -207,7 +207,7 @@ public:
   static void com_read_stop(void);
   static void com_read_cont(void);
   uint8_t com_test_port(void);
-  static uint8_t com_read_bytes(FILE *file, int count);
+  static uint16_t com_read_bytes(FILE *file, int count);
   void com_write_bytes_from_file(uint8_t command, FILE *file, int count);
   static void set_mode (char command);
   static void set_number (uint32_t number, uint8_t command);

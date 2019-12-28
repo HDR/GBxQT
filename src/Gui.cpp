@@ -159,6 +159,7 @@ Gui::Gui (QWidget * parent):QWidget (parent)
 
   connect(thread_RFLA, SIGNAL (set_progress (int, int)), this, SLOT (setProgress (int, int)));
   connect(thread_RFLA, SIGNAL (error (int)), this, SLOT (print_error (int)));
+  connect(cancel_btn, SIGNAL (clicked ()), thread_RFLA, SLOT (canceled ()));
 
   setProgress (0, 1);
   console->setTextColor(Qt::white);
@@ -529,7 +530,7 @@ uint8_t Gui::com_test_port(void) {
 // Read 1 to 256 bytes from the COM port and write it to the global read buffer or to a file if specified.
 // When polling the com port it return less than the bytes we want, keep polling and wait until we have all bytes requested.
 // We expect no more than 256 bytes.
-uint8_t Gui::com_read_bytes (FILE *file, int count) {
+uint16_t Gui::com_read_bytes (FILE *file, int count) {
     uint8_t buffer[257];
     uint16_t rxBytes = 0;
     uint16_t readBytes = 0;
@@ -1774,7 +1775,7 @@ void Gui::gba_flash_write_address_byte (uint32_t address, uint16_t byte) {
 // This is where the Logic lives
 void Gui::read_rom(){
     if(settings->GB_check->checkState() == Qt::Checked){
-        file_name = QFileDialog::getSaveFileName (this, tr ("Write ROM to"), path, tr ("GB/GBC ROM (*.gb *.gbc)"));
+        file_name = QFileDialog::getSaveFileName (this, tr ("Write ROM to"), gameTitle, tr ("GB/GBC ROM (*.gb *.gbc)"));
         if (file_name != ""){
             thread_RFLA->filename = file_name;
             thread_RFLA->cMode = 1;
@@ -1785,7 +1786,7 @@ void Gui::read_rom(){
     }
 
     if(settings->GBA_check->checkState() == Qt::Checked){
-        file_name = QFileDialog::getSaveFileName (this, tr ("Write ROM to"), path, tr ("GBA ROM (*.gba)"));
+        file_name = QFileDialog::getSaveFileName (this, tr ("Write ROM to"), gameTitle, tr ("GBA ROM (*.gba)"));
         if (file_name != ""){
             thread_RFLA->filename = file_name;
             thread_RFLA->cMode = 2;

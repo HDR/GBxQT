@@ -3,3 +3,4 @@ build/
 GBxQT.pro.user.*
 *.gb
 *.gbc
+src/libserialport/*
