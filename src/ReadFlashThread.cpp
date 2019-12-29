@@ -34,7 +34,7 @@ void ReadFlashThread::run(){
             Gui::set_number(currAddr, SET_START_ADDRESS);
             Gui::set_mode(READ_ROM_RAM);
             while (currAddr < endAddr) {
-                if (end == true){emit error(end); break;}
+                if (end == true){emit error(END); break;}
                 if (!Gui::com_read_bytes(romFile, 64)) {emit error(FILEERROR_W); break;}
                 Gui::com_read_bytes(romFile, 64);
                 currAddr += 64;
@@ -75,7 +75,7 @@ void ReadFlashThread::run(){
          }
          else {Gui::set_mode(GBA_READ_ROM);}
          while (currAddr < endAddr) {
-             if (end == true){emit error(end); break;}
+             if (end == true){emit error(END); break;}
              int comReadBytes = Gui::com_read_bytes(romFile, readLength);
              if (comReadBytes == readLength) {
                  currAddr += readLength;

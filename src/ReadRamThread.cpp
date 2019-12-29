@@ -5,8 +5,8 @@
 #include "Gui.h"
 
 void ReadRamThread::run(){
+    end = false;
     if (cMode == 1) {
-        qDebug() << "Entered GB Mode";
         if (ramEndAddress > 0) {
             FILE *ramFile = fopen(filename.toLatin1(), "wb");
             Gui::mbc2_fix();
@@ -22,6 +22,7 @@ void ReadRamThread::run(){
                     Sleep(5);
                     Gui::set_mode(GB_CART_MODE);
                     while (ramAddress < ramEndAddress) {
+                        if (end == true){emit error(END); break;}
                         for (uint8_t x = 0; x < 64; x++) {
                             char hexNum[7];
                             sprintf(hexNum, "HA0x%x", ((ramAddress + x) >> 8));
@@ -58,6 +59,7 @@ void ReadRamThread::run(){
                     Gui::set_number(ramAddress, SET_START_ADDRESS);
                     Gui::set_mode(READ_ROM_RAM);
                     while (ramAddress < ramEndAddress) {
+                        if (end == true){emit error(END); break;}
                         uint8_t comReadBytes = Gui::com_read_bytes(ramFile, 64);
                         if (comReadBytes == 64) {
                             ramAddress += 64;
@@ -88,111 +90,64 @@ void ReadRamThread::run(){
         }
     }
 
-    //Why does this keep looping? it should stop once it reaches the end address (endAddr unspecified?)
-    if (cMode == 2) { // GBA mode
-            // Does cartridge have RAM
+    if (cMode == 2) {
         if (ramEndAddress > 0 || eepromEndAddress > 0) {
-
-            // Create a new file
             FILE *ramFile = fopen(filename.toLatin1(), "wb");
-
-            // SRAM/Flash
             if (ramEndAddress > 0) {
-
-                // Read RAM
                 uint32_t readBytes = 0;
                 for (uint8_t bank = 0; bank < ramBanks; bank++) {
-                    // Flash, switch bank 1
-                    if (bank == 1) {
-                        Gui::set_number(1, GBA_FLASH_SET_BANK);
-                    }
-
-                    // Set start and end address
+                    if (bank == 1) {Gui::set_number(1, GBA_FLASH_SET_BANK);}
                     currAddr = 0x00000;
                     endAddr = ramEndAddress;
                     Gui::set_number(currAddr, SET_START_ADDRESS);
                     Gui::set_mode(GBA_READ_SRAM);
-
                     while (currAddr < endAddr) {
-                        /*com_read_bytes(ramFile, 64);
-                        currAddr += 64;
-                        readBytes += 64;
-
-                        // Request 64 bytes more
-                        if (currAddr < endAddr) {
-                            RS232_cputs(cport_nr, "1");
-                        }*/
-
+                        if (end == true){emit error(END); break;}
                         uint8_t comReadBytes = Gui::com_read_bytes(ramFile, 64);
                         if (comReadBytes == 64) {
                             currAddr += 64;
                             readBytes += 64;
-
-                            // Request 64 bytes more
-                            if (currAddr < endAddr) {
-                                Gui::com_read_cont();
-                            }
+                            if (currAddr < endAddr) {Gui::com_read_cont();}
                         }
-                        else { // Didn't receive 64 bytes, usually this only happens for Apple MACs
+                        else {
                             fflush(ramFile);
                             Gui::com_read_stop();
                             Sleep(500);
                             printf("Retrying\n");
-
-                            // Flush buffer
                             RS232_PollComport(cport_nr, readBuffer, 64);
-
-                            // Start off where we left off
                             fseek(ramFile, currAddr, SEEK_SET);
                             Gui::set_number(currAddr, SET_START_ADDRESS);
                             Gui::set_mode(GBA_READ_SRAM);
                         }
-
                         emit set_progress(readBytes, ramBanks * endAddr);
                     }
-                    Gui::com_read_stop(); // End read (for this bank if Flash)
-
-                    // Flash, switch back to bank 0
+                    Gui::com_read_stop();
                     if (bank == 1) {
                         Gui::set_number(0, GBA_FLASH_SET_BANK);
                     }
                 }
             }
-
-            // EEPROM
             else {
                 Gui::set_number(eepromSize, GBA_SET_EEPROM_SIZE);
-
-                // Set start and end address
                 currAddr = 0x000;
                 endAddr = eepromEndAddress;
                 Gui::set_number(currAddr, SET_START_ADDRESS);
                 Gui::set_mode(GBA_READ_EEPROM);
-
-                // Read EEPROM
                 uint32_t readBytes = 0;
                 while (currAddr < endAddr) {
+                    if (end == true){emit error(END); break;}
                     Gui::com_read_bytes(ramFile, 8);
                     currAddr += 8;
                     readBytes += 8;
-
-                    // Request 64 bytes more
-                    if (currAddr < endAddr) {
-                        RS232_cputs(cport_nr, "1");
-                    }
-
+                    if (currAddr < endAddr) {RS232_cputs(cport_nr, "1");}
                     emit set_progress(readBytes, endAddr);
-                    printf("%i %i\n", currAddr, endAddr);
                 }
-                RS232_cputs(cport_nr, "0"); // Stop reading
+                RS232_cputs(cport_nr, "0");
             }
             fclose(ramFile);
             emit error (true);
-
         }
-        else {
-            emit error (false);
-        }
+        else {emit error (false);}
     }
 }
 
