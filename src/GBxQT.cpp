@@ -65,8 +65,8 @@ main (int argc, char *argv[])
   parse_params (argc, argv);
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QApplication app (argc, argv);
-
   Gui window;
+  QObject::connect(&app, SIGNAL(aboutToQuit()), &window, SLOT(exit()));
   window.show ();
 #ifdef Q_OS_WIN
   window.startup_info();

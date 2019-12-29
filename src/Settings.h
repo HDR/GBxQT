@@ -11,6 +11,10 @@
 #include "const.h"
 #include "Console.h"
 
+extern int mType; //Memory Type
+extern int fType; //Flash Type
+extern int cSize; //Size
+
 class Settings:public QGroupBox
 {
   QString com_name;
@@ -42,8 +46,6 @@ public:
   static QThread::Priority priority;
   QCheckBox *GB_check;
   QCheckBox *GBA_check;
-
-
 
     Settings (QWidget * parent = nullptr);
 
@@ -78,7 +80,7 @@ public:
     return (memty_combo->currentText () == "");
   }
 
-  void setRAsize (int type);
+  void setMType (int type);
   void flash_types (int type, double newParameter = 2.0);
 
 

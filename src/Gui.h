@@ -28,6 +28,7 @@
 #include "rs232/rs232.h"
 
 #include "ReadFlashThread.h"
+#include "ReadRamThread.h"
 extern int cport_nr;
 extern int bdrate;
 
@@ -172,12 +173,11 @@ class Gui:public QWidget
   QPushButton *eram_btn;
   //WriteFlashThread *thread_WFLA;
   ReadFlashThread *thread_RFLA;
+  ReadRamThread *thread_RRAM;
   //EraseThread *thread_E;
-  //ReadRamThread *thread_RRAM;
   //WriteRamThread * thread_WRAM;
   QString path;
   QString file_name;
-
 
 public:
     Gui (QWidget * parent = nullptr);
@@ -190,7 +190,6 @@ public:
   void setRamButtons ();
   void write_flash (void);
   void read_flash (void);
-  void read_ram (void);
   void write_ram (void);
   void show_info (void);
   void erase_flash (void);
@@ -214,7 +213,7 @@ public:
   uint8_t read_cartridge_mode (void);
   static uint8_t request_value (uint8_t command);
   static void set_bank (uint16_t address, uint8_t bank);
-  void mbc2_fix (void);
+  static void mbc2_fix (void);
   void read_gb_header (void);
   uint8_t gba_check_rom_size (void);
   uint8_t gba_test_sram_flash_write (void);
@@ -233,7 +232,10 @@ public:
   void gb_check_change_flash_id (uint8_t flashMethod);
   void gba_flash_write_address_byte (uint32_t address, uint16_t byte);
   void send_hex_wait_ack (uint16_t hex);
-  void read_rom();
   void print_error (int err);
+  void exit();
+  void gba_specify_ram_size(int memoryType, int flashType, int size);
+  void read_rom();
+  void read_ram();
 };
 

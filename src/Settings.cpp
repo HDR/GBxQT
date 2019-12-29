@@ -75,10 +75,9 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
   connect(ctype_combo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Settings::setCtype);
   connect(roms_combo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Settings::setRsize);
   connect(memty_combo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Settings::setMsize);
-  connect(rsize_combo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Settings::setRAsize);
+  connect(rsize_combo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Settings::setMType);
   connect(GBA_check, &QPushButton::clicked, this, &Settings::gbaToggled);
   connect(GB_check, &QPushButton::clicked, this, &Settings::gbToggled);
-
 }
 
 void
@@ -180,10 +179,8 @@ Settings::setRsize (int index)
 void
 Settings::setMsize (int index)
 {
-  if(GB_check->checkState() == Qt::Checked){
-      for (int i = rsize_combo->count() - 1; i >= 0; i--)
-        rsize_combo->removeItem (i);
-  }
+  for (int i = rsize_combo->count() - 1; i >= 0; i--)
+    rsize_combo->removeItem (i);
   switch (index)
   {
     case 0:
@@ -211,29 +208,29 @@ Settings::setMsize (int index)
 }
 
 void
-Settings::setRAsize (int type)
+Settings::setMType (int type)
 {
   if (memty_combo->currentIndex() == 2){
-      switch (type)
-      {
-      case 0:
-        //EEPROM 4Kbit
-        break;
-      case 1:
-        //EEPROM 64Kbit
-        break;
-      }
-  } else {
-      switch (type)
-        {
+      mType = 3;
+      switch(type){
         case 0:
-          //FLASH/SRAM 256Kbit
+          cSize = 1;
           break;
         case 1:
-          //FLASH/SRAM 512Kbit
+          cSize = 2;
+          break;
+      }
+  } else {
+      mType = 2;
+      switch(type){
+        case 0:
+          cSize = 1;
+          break;
+        case 1:
+          cSize = 2;
           break;
         case 2:
-          //FLASH/SRAM 1Mbit
+          cSize = 3;
           break;
         }
   }

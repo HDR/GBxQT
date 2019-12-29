@@ -65,6 +65,10 @@ uint8_t cartridgeMode = GB_MODE;
 int flashCartType = 0;
 uint8_t flashID[10];
 
+int mType; //Memory Type
+int fType; //Flash Type
+int cSize; //Size
+
 uint8_t nintendoLogo[] = {0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E};
 uint8_t nintendoLogoGBA[] = {0x24, 0xFF, 0xAE, 0x51, 0x69, 0x9A, 0xA2, 0x21, 0x3D, 0x84, 0x82, 0x0A, 0x84, 0xE4, 0x09, 0xAD,0x11, 0x24, 0x8B, 0x98, 0xC0, 0x81, 0x7F, 0x21, 0xA3, 0x52, 0xBE, 0x19, 0x93, 0x09, 0xCE, 0x20, 0x10, 0x46, 0x4A, 0x4A, 0xF8, 0x27, 0x31, 0xEC, 0x58, 0xC7, 0xE8, 0x33, 0x82, 0xE3, 0xCE, 0xBF, 0x85, 0xF4, 0xDF, 0x94, 0xCE, 0x4B, 0x09, 0xC1, 0x94, 0x56, 0x8A, 0xC0, 0x13, 0x72, 0xA7, 0xFC, 0x9F, 0x84, 0x4D, 0x73, 0xA3, 0xCA, 0x9A, 0x61, 0x58, 0x97, 0xA3, 0x27, 0xFC, 0x03, 0x98, 0x76, 0x23, 0x1D, 0xC7, 0x61, 0x03, 0x04, 0xAE, 0x56, 0xBF, 0x38, 0x84, 0x00, 0x40, 0xA7, 0x0E, 0xFD, 0xFF, 0x52, 0xFE, 0x03, 0x6F, 0x95, 0x30, 0xF1, 0x97, 0xFB, 0xC0, 0x85, 0x60, 0xD6, 0x80, 0x25, 0xA9, 0x63, 0xBE, 0x03, 0x01, 0x4E, 0x38, 0xE2, 0xF9, 0xA2, 0x34, 0xFF, 0xBB, 0x3E, 0x03, 0x44, 0x78, 0x00, 0x90, 0xCB, 0x88, 0x11, 0x3A, 0x94, 0x65, 0xC0, 0x7C, 0x63, 0x87, 0xF0, 0x3C, 0xAF, 0xD6, 0x25, 0xE4, 0x8B, 0x38, 0x0A, 0xAC, 0x72, 0x21, 0xD4, 0xF8, 0x07};
 
@@ -142,8 +146,8 @@ Gui::Gui (QWidget * parent):QWidget (parent)
 
   //thread_WFLA = new WriteFlashThread;
   thread_RFLA = new ReadFlashThread;
+  thread_RRAM = new ReadRamThread;
   //thread_E = new EraseThread;
-  //thread_RRAM = new ReadRamThread;
   //hread_WRAM = new WriteRamThread
 
   int func_wr = rand() % 100 + 1;
@@ -151,15 +155,19 @@ Gui::Gui (QWidget * parent):QWidget (parent)
     if (func_wr == 23){winTaskbar->setWindow(this->windowHandle());winTaskbar->progress()->setVisible(true);winTaskbar->setOverlayIcon(QIcon(":/qss_icons/rc/genericarrow.png"));}
   #endif
 
-  connect (wflash_btn, SIGNAL (clicked ()), this, SLOT (write_flash ()));
-  connect(rflash_btn, &QPushButton::clicked, this, &Gui::read_rom);
   connect (status_btn, SIGNAL (clicked ()), this, SLOT (show_info ()));
   connect (eflash_btn, SIGNAL (clicked ()), this, SLOT (erase_flash ()));
   connect (settings, SIGNAL (refresh_ram_buttons (void)), this, SLOT (setRamButtons (void)));
 
+  connect(rflash_btn, &QPushButton::clicked, this, &Gui::read_rom);
   connect(thread_RFLA, SIGNAL (set_progress (int, int)), this, SLOT (setProgress (int, int)));
   connect(thread_RFLA, SIGNAL (error (int)), this, SLOT (print_error (int)));
   connect(cancel_btn, SIGNAL (clicked ()), thread_RFLA, SLOT (canceled ()));
+
+  connect (rram_btn, &QPushButton::clicked, this, &Gui::read_ram);
+  connect(thread_RRAM, SIGNAL (set_progress (int, int)), this, SLOT (setProgress (int, int)));
+  connect(thread_RRAM, SIGNAL (error (int)), this, SLOT (print_error (int)));
+  connect(cancel_btn, SIGNAL (clicked ()), thread_RRAM, SLOT (canceled ()));
 
   setProgress (0, 1);
   console->setTextColor(Qt::white);
@@ -172,12 +180,10 @@ void
 Gui::startup_info (void)
 {
     read_config();
-
-    if (Gui::com_test_port() == 1) {
+    if (com_test_port() == 1) {
        device->com_label->setText("Port: COM" + QString::number(cport_nr+1));
-        Gui::set_mode('0');
-        cartridgeMode = Gui::request_value(CART_MODE);
-        gbxcartPcbVersion = Gui::request_value(READ_PCB_VERSION);
+        set_mode('0');
+        gbxcartPcbVersion = request_value(READ_PCB_VERSION);
         if (gbxcartPcbVersion == 1){
             device->pcb_label->setText("PCB Version: 1.0");
         }
@@ -187,12 +193,10 @@ Gui::startup_info (void)
         if (gbxcartPcbVersion == 4){
             device->pcb_label->setText("PCB Version: 1.3");
         }
-        gbxcartFirmwareVersion = Gui::request_value(READ_FIRMWARE_VERSION);
-        device->firm_label->setText("Firmware Version: " + QString::number(gbxcartFirmwareVersion));
-        Gui::set_mode(VOLTAGE_3_3V);
+        device->firm_label->setText("Firmware Version: " + QString::number(request_value(READ_FIRMWARE_VERSION)));
+        set_mode(VOLTAGE_3_3V);
     } else {
-        console->print("Device not connected and couldn't be auto detected\n");
-        Gui::read_one_letter();
+        console->print("Device could not be detected, is it connected?");
     }
 }
 
@@ -225,15 +229,6 @@ Gui::write_flash (void)
   file_name =
     QFileDialog::getOpenFileName (this, tr ("Read FLASH from..."), path,
                   tr ("GB Rom Dumps (*.gb *.gbc *.sgb)"));
-}
-
-
-void
-Gui::read_ram (void)
-{
-  file_name =
-    QFileDialog::getSaveFileName (this, tr ("Write RAM to..."), path,
-                  tr ("GB Save (*.sav)"));
 }
 
 void
@@ -914,10 +909,6 @@ uint8_t Gui::gba_check_rom_size (void) {
         }
 
         currAddr += 0x20000; // Increment address by 131K
-
-        if (x % 10 == 0) {
-            //console->print(".");
-        }
     }
 
     return romSize;
@@ -1775,6 +1766,7 @@ void Gui::gba_flash_write_address_byte (uint32_t address, uint16_t byte) {
 // This is where the Logic lives
 void Gui::read_rom(){
     if(settings->GB_check->checkState() == Qt::Checked){
+        read_gb_header();
         file_name = QFileDialog::getSaveFileName (this, tr ("Write ROM to"), gameTitle, tr ("GB/GBC ROM (*.gb *.gbc)"));
         if (file_name != ""){
             thread_RFLA->filename = file_name;
@@ -1786,6 +1778,7 @@ void Gui::read_rom(){
     }
 
     if(settings->GBA_check->checkState() == Qt::Checked){
+        read_gba_header();
         file_name = QFileDialog::getSaveFileName (this, tr ("Write ROM to"), gameTitle, tr ("GBA ROM (*.gba)"));
         if (file_name != ""){
             thread_RFLA->filename = file_name;
@@ -1795,4 +1788,92 @@ void Gui::read_rom(){
             console->print(tr ("Reading data from FLASH to file:") + "\n" + file_name);
         }
     }
+}
+
+void Gui::gba_specify_ram_size(int memoryType, int flashType, int size) {
+    if (memoryType == 1 || memoryType == 2) {
+        eepromSize = EEPROM_NONE;
+        eepromEndAddress = 0;
+
+        if (memoryType == 1) {
+            hasFlashSave = NO_FLASH;
+        }
+        else {
+            if (flashType == 1) {
+                hasFlashSave = FLASH_FOUND_ATMEL;
+            }
+            else if (flashType == 2) {
+                hasFlashSave = FLASH_FOUND;
+            }
+        }
+
+        ramSize = size;
+        if (size == 0) {
+            ramEndAddress = 0;
+        }
+        else if (size == 1) {
+            ramEndAddress = 0x8000;
+            ramBanks = 1;
+        }
+        else if (size == 2) {
+            ramEndAddress = 0x10000;
+            ramBanks = 1;
+        }
+        else if (size == 3) {
+            ramEndAddress = 0x10000;
+            ramBanks = 2;
+        }
+    }
+    else if (memoryType == 3) {
+        ramSize = size;
+        eepromEndAddress = 0x00;
+        eepromSize = EEPROM_NONE;
+        hasFlashSave = NO_FLASH;
+        ramEndAddress = 0;
+
+        if (size == 1) {
+            eepromEndAddress = 0x200;
+            eepromSize = EEPROM_4KBIT;
+            hasFlashSave = NO_FLASH;
+            ramEndAddress = 0;
+        }
+        else if (size == 2) {
+            eepromEndAddress = 0x2000;
+            eepromSize = EEPROM_64KBIT;
+            hasFlashSave = NO_FLASH;
+            ramEndAddress = 0;
+        }
+    }
+}
+
+void Gui::read_ram(){
+    if(settings->GB_check->checkState() == Qt::Checked){
+        read_gb_header();
+        file_name = QFileDialog::getSaveFileName (this, tr ("Write Save to"), gameTitle, tr ("GB/GBC Save (*.sav)"));
+        if (file_name != ""){
+            thread_RRAM->filename = file_name;
+            thread_RRAM->cMode = 1;
+            setEnabledButtons(false);
+            thread_RRAM->start(Settings::priority);
+            console->print(tr ("Reading data from ROM to file:") + "\n" + file_name);
+        }
+    }
+
+    if(settings->GBA_check->checkState() == Qt::Checked){
+        file_name = QFileDialog::getSaveFileName (this, tr ("Write Save to"), gameTitle, tr ("GBA Save (*.sav)"));
+        if (file_name != ""){
+            gba_specify_ram_size(mType, 2, cSize);
+            thread_RRAM->filename = file_name;
+            thread_RRAM->cMode = 2;
+            setEnabledButtons(false);
+            thread_RRAM->start(Settings::priority);
+            console->print(tr ("Reading data from ROM to file:") + "\n" + file_name);
+        }
+    }
+}
+
+
+void Gui::exit(){
+    set_mode('0');
+    RS232_CloseComport(cport_nr+1);
 }
