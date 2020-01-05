@@ -26,6 +26,8 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <QWinTaskbarProgress>
+#include <QStyleFactory>
+#include <QSettings>
 #else
 #define _XOPEN_SOURCE 600
 #include <time.h>
@@ -75,21 +77,7 @@ uint8_t nintendoLogoGBA[] = {0x24, 0xFF, 0xAE, 0x51, 0x69, 0x9A, 0xA2, 0x21, 0x3
 Gui::Gui (QWidget * parent):QWidget (parent)
 {
   QThread::currentThread ()->setPriority (QThread::NormalPriority);
-  path = ".";			//current startup dir'
-  if (Settings::darkmode == true)
-  {
-      QFile f(":qdarkstyle/style.qss");
-      if (!f.exists())
-      {
-          console->print("Unable to set stylesheet, file not found\n");
-      }
-      else
-      {
-          f.open(QFile::ReadOnly | QFile::Text);
-          QTextStream ts(&f);
-          qApp->setStyleSheet(ts.readAll());
-      }
-  }
+  path = ".";
 
   this->setWindowIcon (QIcon (QPixmap (icon)));
   this->setWindowTitle (tr ("GBxQT Version ") + VER);
@@ -123,7 +111,7 @@ Gui::Gui (QWidget * parent):QWidget (parent)
   down->addWidget (cancel_btn);
   right->addLayout (down);
   grid->addLayout (right, 0, 2);
-  status_btn = new QPushButton (tr ("Read Cart Info"), this);
+  status_btn = new QPushButton (tr ("Cart Info"), this);
   rflash_btn = new QPushButton (tr ("Read ROM"), this);
   wflash_btn = new QPushButton (tr ("Write ROM"), this);
   rram_btn = new QPushButton (tr ("Backup Save"), this);

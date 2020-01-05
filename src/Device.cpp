@@ -7,6 +7,7 @@
 #include "Gui.h"
 #include "Console.h"
 #include <math.h>
+#include <QStyleFactory>
 
 Device::Device (QWidget * parent):QGroupBox (tr ("Device Info"), parent)
 {
@@ -14,6 +15,13 @@ Device::Device (QWidget * parent):QGroupBox (tr ("Device Info"), parent)
     north = new QHBoxLayout ();
     down = new QHBoxLayout ();
     all = new QHBoxLayout ();
+
+    if (Settings::darkmode == false){
+        #ifdef Q_OS_WIN
+            Device::setStyle(QStyleFactory::create("windows"));
+        #endif
+    }
+
 
     com_label = new QLabel ("Port : Not Connected", this);
     labels->addWidget(com_label);

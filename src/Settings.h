@@ -43,6 +43,7 @@ class Settings:public QGroupBox
 
 public:
   static bool darkmode;
+  static bool noautotheme;
   static QThread::Priority priority;
   QCheckBox *GB_check;
   QCheckBox *GBA_check;

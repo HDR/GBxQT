@@ -6,8 +6,10 @@
 #include "Settings.h"
 #include "Gui.h"
 #include <math.h>
+#include <QStyleFactory>
 
 bool Settings::darkmode = 0;
+bool Settings::noautotheme = 0;
 QThread::Priority Settings::priority = QThread::NormalPriority;
 
 Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
@@ -20,6 +22,7 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
   down = new QHBoxLayout ();
   north = new QHBoxLayout ();
   all = new QVBoxLayout ();
+
   ctype_label = new QLabel ("Cartridge Type:", this);
 
   labels->addWidget (ctype_label);
@@ -65,6 +68,11 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
   GBA_check->setEnabled(false);
   down->addWidget (GBA_check);
 
+  if (Settings::darkmode == false){
+      #ifdef Q_OS_WIN
+          Settings::setStyle(QStyleFactory::create("windows"));
+      #endif
+  }
 
   north->addLayout (labels);
   north->addLayout (combo_boxes);
