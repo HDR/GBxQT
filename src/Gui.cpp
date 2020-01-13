@@ -88,7 +88,6 @@ Gui::Gui (QWidget * parent):QWidget (parent)
   down = new QHBoxLayout ();
 
   image = new QLabel (this);
-
   image->setFixedSize (200, 50);
   settings = new Settings (this);
   left->addWidget (settings);
@@ -138,8 +137,8 @@ Gui::Gui (QWidget * parent):QWidget (parent)
   //thread_E = new EraseThread;
   //hread_WRAM = new WriteRamThread
 
-  int func_wr = rand() % 100 + 1;
   #if defined (_WIN32)
+    int func_wr = rand() % 100 + 1;
     if (func_wr == 23){winTaskbar->setWindow(this->windowHandle());winTaskbar->progress()->setVisible(true);winTaskbar->setOverlayIcon(QIcon(":/qss_icons/rc/genericarrow.png"));}
   #endif
 
@@ -171,60 +170,50 @@ Gui::startup_info (void)
     if (com_test_port() == 1) {
        device->com_label->setText("Port: COM" + QString::number(cport_nr+1));
         set_mode('0');
-        gbxcartPcbVersion = request_value(READ_PCB_VERSION);
-        if (gbxcartPcbVersion == 1){
-            device->pcb_label->setText("PCB Version: 1.0");
-        }
-        if (gbxcartPcbVersion == 2){
-            device->pcb_label->setText("PCB Version: 1.1");
-        }
-        if (gbxcartPcbVersion == 4){
-            device->pcb_label->setText("PCB Version: 1.3");
+        switch(request_value(READ_PCB_VERSION)){
+            case PCB_1_0:
+                device->pcb_label->setText("PCB Version: 1.0");
+                break;
+            case PCB_1_1:
+                device->pcb_label->setText("PCB Version: 1.1");
+                break;
+            case PCB_1_3:
+                device->pcb_label->setText("PCB Version: 1.3");
+                break;
+            case PCB_GBXMAS:
+                device->pcb_label->setText("PCB Version: GBxMAS");
+                break;
+            case PCB_Mini:
+                device->pcb_label->setText("PCB Version: Mini");
+                break;
         }
         device->firm_label->setText("Firmware Version: " + QString::number(request_value(READ_FIRMWARE_VERSION)));
         set_mode(VOLTAGE_3_3V);
-    } else {
-        console->print("Device could not be detected, is it connected?");
-    }
+    } else {console->print("Device could not be detected, is it connected?");}
 }
 
 void
 Gui::show_info ()
 {
     if(request_value(CART_MODE) == 2){
-        console->clearConsole();
         read_gba_header();
     }
 
     if(request_value(CART_MODE) == 1){
-        console->clearConsole();
         read_gb_header();
     }
-}
-
-
-void
-Gui::read_flash (void)
-{
-  file_name =
-    QFileDialog::getSaveFileName (this, tr ("Write FLASH to..."), path,
-                  tr ("GB Rom Dumps (*.gb *.gbc *.sgb)"));
 }
 
 void
 Gui::write_flash (void)
 {
-  file_name =
-    QFileDialog::getOpenFileName (this, tr ("Read FLASH from..."), path,
-                  tr ("GB Rom Dumps (*.gb *.gbc *.sgb)"));
+  file_name = QFileDialog::getOpenFileName (this, tr ("Read FLASH from..."), path, tr ("GB Rom Dumps (*.gb *.gbc *.sgb)"));
 }
 
 void
 Gui::write_ram (void)
 {
-  file_name =
-    QFileDialog::getOpenFileName (this, tr ("Read RAM from..."), path,
-                  tr ("GB Save (*.sav)"));
+  file_name = QFileDialog::getOpenFileName (this, tr ("Read RAM from..."), path, tr ("GB Save (*.sav)"));
 }
 
 void
@@ -343,7 +332,7 @@ void Gui::read_config(void) {
     FILE* configfile = fopen (configFilePath , "rt");
     if (configfile != nullptr) {
         if (fscanf(configfile, "%d\n%d", &cport_nr, &bdrate) != 2) {
-            fprintf(stderr, "Config file is corrupt\n");
+            fprintf(stderr, "Config file is corrupt");
         }
         else {
             cport_nr--;
@@ -351,7 +340,7 @@ void Gui::read_config(void) {
         fclose(configfile);
     }
     else {
-        fprintf(stderr, "Config file not found\n");
+        fprintf(stderr, "Config file not found");
     }
 }
 
@@ -383,7 +372,7 @@ void Gui::load_cart_ram_info(void) {
     FILE *infoFile = fopen(titleFilename, "rt");
     if (infoFile != nullptr) {
         if (fscanf(infoFile, "%d,%d,%d,", &ramSize, &eepromSize, &hasFlashSave) != 3) {
-            fprintf(stderr, "Cart RAM info %s is corrupt\n", titleFilename);
+            fprintf(stderr, "Cart RAM info %s is corrupt", titleFilename);
         }
         fclose(infoFile);
     }
@@ -427,22 +416,6 @@ char Gui::read_one_letter (void) {
     char c = getchar();
     while (getchar() != '\n' && getchar() != EOF);
     return c;
-}
-
-// Print progress
-void Gui::print_progress_percent (uint32_t bytesRead, uint32_t hashNumber) {
-    //console->print("%i, %i\n", bytesRead, hashNumber);
-
-    if ((bytesRead % hashNumber == 0) && bytesRead != 0) {
-        if (hashNumber == 64) {
-            console->print("########");
-            fflush(stdout);
-        }
-        else {
-            console->print("#");
-            fflush(stdout);
-        }
-    }
 }
 
 // Wait for a "1" acknowledgement from the ATmega
@@ -699,6 +672,8 @@ void Gui::mbc2_fix (void) {
 
 // Read the first 384 bytes of ROM and process the Gameboy header information
 void Gui::read_gb_header (void) {
+    console->clearConsole();
+
     currAddr = 0x0000;
     endAddr = 0x0180;
 
@@ -1154,7 +1129,6 @@ uint8_t Gui::gba_check_sram_flash (void) {
 
 
     // Check if it's SRAM or Flash at this stage, maximum for SRAM is 512Kbit
-    console->print("\n");
     hasFlashSave = gba_test_sram_flash_write();
     if (hasFlashSave == NO_FLASH) {
         return SRAM_FLASH_512KBIT;
@@ -1194,11 +1168,11 @@ uint8_t Gui::gba_check_sram_flash (void) {
 
         // If bank 0 and 1 are duplicated, then it's 512Kbit Flash
         if (duplicateCount >= 2000) {
-            console->print("512Kbit\n");
+            console->print("512Kbit");
             return SRAM_FLASH_512KBIT;
         }
         else {
-            console->print("1Mbit\n");
+            console->print("1Mbit");
             return SRAM_FLASH_1MBIT;
         }
     }
@@ -1360,6 +1334,8 @@ void Gui::gba_read_gametitle(void) {
 
 // Read the first 192 bytes of ROM, read the title, check and test for ROM, SRAM, EEPROM and Flash
 void Gui::read_gba_header (void) {
+    console->clearConsole();
+
     currAddr = 0x0000;
     endAddr = 0x00BF;
     set_number(currAddr, SET_START_ADDRESS);
@@ -1465,15 +1441,15 @@ void Gui::read_gba_header (void) {
 
     if (eepromSize == EEPROM_NONE) {
         eepromEndAddress = 0;
-        console->print("EEPROM: None\n");
+        console->print("EEPROM: None");
     }
     else if (eepromSize == EEPROM_4KBIT) {
         eepromEndAddress = 0x200;
-        console->print("EEPROM: 4Kbit\n");
+        console->print("EEPROM: 4Kbit");
     }
     else if (eepromSize == EEPROM_64KBIT) {
         eepromEndAddress = 0x2000;
-        console->print("EEPROM: 64Kbit\n");
+        console->print("EEPROM: 64Kbit");
     }
 }
 
@@ -1513,12 +1489,12 @@ void Gui::read_config_flash(void) {
     FILE* configfile = fopen(configFilePath, "rt");
     if (configfile != nullptr) {
         if (fscanf(configfile, "%d", &flashCartType) != 1) {
-            fprintf(stderr, "Flash Config file is corrupt\n");
+            fprintf(stderr, "Flash Config file is corrupt");
         }
         fclose(configfile);
     }
     else {
-        fprintf(stderr, "Flash Config file not found\n");
+        fprintf(stderr, "Flash Config file not found");
     }
 }
 
@@ -1653,7 +1629,8 @@ void Gui::gb_check_change_flash_id (uint8_t flashMethod) {
         if (x >= 1) {
             for (uint8_t r = 0; r < 8; r++) {
                 if (readBuffer[r] != readRomResult[r]) {
-                    console->print("\n*** The cartridge is changing it's data when being read back.\nPlease re-seat the cart and power cycle GBxCart. ***\n");
+                    console->print("*** The cartridge is changing it's data when being read back.");
+                    console->print("Please re-seat the cart and power cycle GBxCart. ***");
                     read_one_letter();
                     break;
                 }
@@ -1720,7 +1697,7 @@ void Gui::gb_check_change_flash_id (uint8_t flashMethod) {
     delay_ms(5);
 
     if (resultChanged == 0) {
-        console->print("\n*** Flash chip doesn't appear to be responding. Please re-seat the cart and power cycle GBxCart ***\n");
+        console->print("*** Flash chip doesn't appear to be responding. Please re-seat the cart and power cycle GBxCart ***");
         read_one_letter();
     }
 }
@@ -1761,7 +1738,7 @@ void Gui::read_rom(){
             thread_RFLA->cMode = 1;
             setEnabledButtons(false);
             thread_RFLA->start(Settings::priority);
-            console->print(tr ("Reading data from FLASH to file:") + "\n" + file_name);
+            console->print(tr ("Reading data from FLASH to file:") + file_name);
         }
     }
 
@@ -1773,7 +1750,7 @@ void Gui::read_rom(){
             thread_RFLA->cMode = 2;
             setEnabledButtons(false);
             thread_RFLA->start(Settings::priority);
-            console->print(tr ("Reading data from FLASH to file:") + "\n" + file_name);
+            console->print(tr ("Reading data from FLASH to file:") + file_name);
         }
     }
 }
@@ -1843,7 +1820,7 @@ void Gui::read_ram(){
             thread_RRAM->cMode = 1;
             setEnabledButtons(false);
             thread_RRAM->start(Settings::priority);
-            console->print(tr ("Reading data from ROM to file:") + "\n" + file_name);
+            console->print(tr ("Reading data from ROM to file:") + file_name);
         }
     }
 
@@ -1855,7 +1832,7 @@ void Gui::read_ram(){
             thread_RRAM->cMode = 2;
             setEnabledButtons(false);
             thread_RRAM->start(Settings::priority);
-            console->print(tr ("Reading data from ROM to file:") + "\n" + file_name);
+            console->print(tr ("Reading data from ROM to file:") + file_name);
         }
     }
 }

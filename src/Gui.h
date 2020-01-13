@@ -16,7 +16,6 @@
 #else
 #include <unistd.h>
 #endif
-
 #include <stdint.h>
 #include <stdio.h>
 
@@ -122,6 +121,8 @@ extern int bdrate;
 #define PCB_1_0 1
 #define PCB_1_1 2
 #define PCB_1_3 4
+#define PCB_GBXMAS 90
+#define PCB_Mini 100
 
 // Common vars
 #define READ_BUFFER nullptr
@@ -189,7 +190,6 @@ public:
   void setEnabledButtons (bool stan);
   void setRamButtons ();
   void write_flash (void);
-  void read_flash (void);
   void write_ram (void);
   void show_info (void);
   void erase_flash (void);
@@ -201,7 +201,6 @@ public:
   void write_cart_ram_info(void);
   static void delay_ms(uint16_t ms);
   char read_one_letter(void);
-  void print_progress_percent(uint32_t bytesRead, uint32_t hashNumber);
   void com_wait_for_ack (void);
   static void com_read_stop(void);
   static void com_read_cont(void);

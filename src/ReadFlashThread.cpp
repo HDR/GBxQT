@@ -35,7 +35,6 @@ void ReadFlashThread::run(){
             Gui::set_mode(READ_ROM_RAM);
             while (currAddr < endAddr) {
                 if (end == true){emit error(END); break;}
-                if (!Gui::com_read_bytes(romFile, 64)) {emit error(FILEERROR_W); break;}
                 Gui::com_read_bytes(romFile, 64);
                 currAddr += 64;
                 readBytes += 64;
@@ -49,8 +48,8 @@ void ReadFlashThread::run(){
                 else {
                     fflush(romFile);
                     Gui::com_read_stop();
-                    Sleep(500);
-                    printf("Retrying\n");
+                    sleep(500);
+                    qDebug() << "Retrying\n";
                     RS232_PollComport(cport_nr, readBuffer, 64);
                     fseek(romFile, readBytes, SEEK_SET);
                     Gui::set_number(currAddr, SET_START_ADDRESS);
@@ -84,7 +83,7 @@ void ReadFlashThread::run(){
              else {
                  fflush(romFile);
                  Gui::com_read_stop();
-                 Sleep(500);
+                 sleep(500);
                  qDebug() << "Retrying";
                  RS232_PollComport(cport_nr, readBuffer, readLength);
                  fseek(romFile, long(currAddr), SEEK_SET);

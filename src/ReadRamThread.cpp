@@ -19,7 +19,7 @@ void ReadRamThread::run(){
                     Gui::set_bank(0x4000, bank);
                     Gui::set_number(ramAddress, SET_START_ADDRESS);
                     RS232_cputs(cport_nr, "M0");
-                    Sleep(5);
+                    sleep(5);
                     Gui::set_mode(GB_CART_MODE);
                     while (ramAddress < ramEndAddress) {
                         if (end == true){emit error(END); break;}
@@ -69,7 +69,7 @@ void ReadRamThread::run(){
                         else {
                             fflush(ramFile);
                             Gui::com_read_stop();
-                            Sleep(500);
+                            sleep(500);
                             printf("Retrying\n");
                             RS232_PollComport(cport_nr, readBuffer, 64);
                             fseek(ramFile, readBytes, SEEK_SET);
@@ -112,7 +112,7 @@ void ReadRamThread::run(){
                         else {
                             fflush(ramFile);
                             Gui::com_read_stop();
-                            Sleep(500);
+                            sleep(500);
                             printf("Retrying\n");
                             RS232_PollComport(cport_nr, readBuffer, 64);
                             fseek(ramFile, currAddr, SEEK_SET);
