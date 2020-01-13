@@ -1,7 +1,7 @@
 #ifndef FL_CONST_H_
 #define FL_CONST_H_
 
-#define VER "1.0 (64bit)"
+#define VER "1.0"
 
 enum error_codes
 { TIMEOUT = -1, FILEERROR_O = -2, FILEERROR_W = -3, FILEERROR_R =

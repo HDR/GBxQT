@@ -1,3 +1,4 @@
+
 # GBxQT
  Custom software for InsideGadget's GBx devices
  
@@ -18,3 +19,17 @@
 1. Install qt using `brew install qt` and `brew link qt --force`
 2. Run `qmake GBxQT.pro "CONFIG+=qtquickcompiler"`
 3. Run make
+
+## Images
+
+#### Windows Light Mode
+![](GBxQT-Windows-Light.png)
+
+#### Windows Dark Mode
+![](GBxQT-Windows-Dark.png)
+
+#### Linux
+![](GBxQT-Linux.png)
+
+#### MacOS
+![](GBxQT-MacOS.png)
