@@ -11,7 +11,7 @@
 4. Run mingw32-make
 
 ### Linux
-1. Install qt using your distro's package manager (apt install qt5-qmake if your distro uses apt)
+1. Install qt using your distro's package manager (apt install qt5-default if your distro uses apt)
 2. Run `qmake GBxQT.pro "CONFIG+=qtquickcompiler"`
 3. Run make
 
