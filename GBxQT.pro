@@ -10,7 +10,7 @@ win32 {
 }
 
 unix {
-    QT += network widgets
+    QT += network widgets gui
 }
 
 RESOURCES += qdarkstyle/style.qrc

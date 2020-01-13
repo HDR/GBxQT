@@ -101,8 +101,6 @@ main (int argc, char *argv[])
   Gui window;
   QObject::connect(&app, SIGNAL(aboutToQuit()), &window, SLOT(exit()));
   window.show ();
-#ifdef Q_OS_WIN
   window.startup_info();
-#endif
   return app.exec ();
 }
