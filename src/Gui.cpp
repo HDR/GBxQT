@@ -92,7 +92,6 @@ Gui::Gui (QWidget * parent):QWidget (parent)
   settings = new Settings (this);
   left->addWidget (settings);
   device = new Device (this);
-  device->setFixedSize (200, 100);
   left->addWidget (image);
   left->addWidget (device);
   left->addStretch (1);
