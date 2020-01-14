@@ -31,5 +31,8 @@
 #### Linux
 ![](GBxQT-Linux.png)
 
-#### MacOS
-![](GBxQT-MacOS.png)
+#### MacOS Light Mode
+![](GBxQT-MacOS-Dark.png)
+
+#### MacOS Dark Mode
+![](GBxQT-MacOS-Light.png)
