@@ -32,7 +32,7 @@
 ![](GBxQT-Linux.png)
 
 #### MacOS Light Mode
-![](GBxQT-MacOS-Dark.png)
+![](GBxQT-MacOS-Light.png)
 
 #### MacOS Dark Mode
-![](GBxQT-MacOS-Light.png)
+![](GBxQT-MacOS-Dark.png)
