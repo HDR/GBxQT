@@ -74,7 +74,7 @@ main (int argc, char *argv[])
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QApplication app (argc, argv);
 #ifdef Q_OS_WIN
-  app.setStyle(QStyleFactory::create("Fusion"));
+
   if(QOperatingSystemVersion::current() >= QOperatingSystemVersion(QOperatingSystemVersion::Windows10) && Settings::noautotheme != true){
       QSettings GetLightMode("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
       if(GetLightMode.value("AppsUseLightTheme").toString() == "0"){
@@ -95,6 +95,8 @@ main (int argc, char *argv[])
           QTextStream ts(&f);
           qApp->setStyleSheet(ts.readAll());
       }
+  } else {
+    app.setStyle(QStyleFactory::create("Fusion"));
   }
 
 #endif

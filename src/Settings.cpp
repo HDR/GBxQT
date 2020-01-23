@@ -17,6 +17,12 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
   QSettings
     set;
 
+  if (Settings::darkmode == false){
+      #ifdef Q_OS_WIN
+          Settings::setStyle(QStyleFactory::create("windows"));
+      #endif
+  }
+
   labels = new QVBoxLayout ();
   combo_boxes = new QVBoxLayout ();
   down = new QHBoxLayout ();
@@ -67,12 +73,6 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
   GBA_check->setCheckState (Qt::Checked);
   GBA_check->setEnabled(false);
   down->addWidget (GBA_check);
-
-  if (Settings::darkmode == false){
-      #ifdef Q_OS_WIN
-          Settings::setStyle(QStyleFactory::create("windows"));
-      #endif
-  }
 
   north->addLayout (labels);
   north->addLayout (combo_boxes);
