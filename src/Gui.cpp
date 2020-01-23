@@ -114,16 +114,12 @@ Gui::Gui (QWidget * parent):QWidget (parent)
   wflash_btn = new QPushButton (tr ("Write ROM"), this);
   rram_btn = new QPushButton (tr ("Backup Save"), this);
   wram_btn = new QPushButton (tr ("Restore Save"), this);
-  eflash_btn = new QPushButton (tr ("Erase ROM"), this);
-  eram_btn = new QPushButton (tr ("Erase Save"), this);
 
   center->addWidget (status_btn, Qt::AlignTop);
   center->addWidget (rflash_btn);
   center->addWidget (wflash_btn);
   center->addWidget (rram_btn);
   center->addWidget (wram_btn);
-  center->addWidget (eflash_btn);
-  center->addWidget (eram_btn);
   center->addStretch (1);
   grid->addLayout (center, 0, 1);
   #if defined (_WIN32)
@@ -142,7 +138,6 @@ Gui::Gui (QWidget * parent):QWidget (parent)
   #endif
 
   connect (status_btn, SIGNAL (clicked ()), this, SLOT (show_info ()));
-  connect (eflash_btn, SIGNAL (clicked ()), this, SLOT (erase_flash ()));
   connect (settings, SIGNAL (refresh_ram_buttons (void)), this, SLOT (setRamButtons (void)));
 
   connect(rflash_btn, &QPushButton::clicked, this, &Gui::read_rom);
@@ -216,18 +211,6 @@ Gui::write_ram (void)
 }
 
 void
-Gui::erase_flash (void)
-{
-}
-
-void
-Gui::erase_ram (void)
-{
-}
-
-
-
-void
 Gui::setProgress (int ile, int max)
 {
   progress->setMinimum (0);
@@ -249,13 +232,11 @@ Gui::setEnabledButtons (bool state)
   status_btn->setEnabled (state);
   rflash_btn->setEnabled (state);
   wflash_btn->setEnabled (state);
-  eflash_btn->setEnabled (state);
   cancel_btn->setEnabled (!state);
   if (settings->isRamDisabled ())
     state = false;
   rram_btn->setEnabled (state);
   wram_btn->setEnabled (state);
-  eram_btn->setEnabled (state);
 
 }
 

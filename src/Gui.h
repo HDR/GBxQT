@@ -170,8 +170,6 @@ class Gui:public QWidget
   QPushButton *wflash_btn;
   QPushButton *rram_btn;
   QPushButton *wram_btn;
-  QPushButton *eflash_btn;
-  QPushButton *eram_btn;
   //WriteFlashThread *thread_WFLA;
   ReadFlashThread *thread_RFLA;
   ReadRamThread *thread_RRAM;
@@ -192,8 +190,6 @@ public:
   void write_flash (void);
   void write_ram (void);
   void show_info (void);
-  void erase_flash (void);
-  void erase_ram (void);
   void setProgress (int ile, int max);
   void read_config(void);
   void write_config(void);
