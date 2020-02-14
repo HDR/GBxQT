@@ -47,7 +47,6 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
   roms_combo->insertItem (3, "32 MByte");
   roms_combo->setCurrentIndex (0);
 
-
   memty_label = new QLabel ("Memory Type:", this);
   labels->addWidget (memty_label);
   memty_combo = new QComboBox (this);
@@ -56,7 +55,6 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
   memty_combo->insertItem (1, "FLASH");
   memty_combo->insertItem (2, "EEPROM");
   memty_combo->setCurrentIndex (0);
-
 
   rsize_label = new QLabel ("RAM Size:", this);
   labels->addWidget (rsize_label);
@@ -258,8 +256,6 @@ void
 Settings::gbToggled ()
 {
     if(GB_check->checkState() == Qt::Checked){
-
-
         Gui::set_mode(VOLTAGE_5V);
         GBA_check->setEnabled(true);
         GB_check->setEnabled(false);
