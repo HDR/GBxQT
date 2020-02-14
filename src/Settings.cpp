@@ -47,6 +47,7 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
   roms_combo->insertItem (3, "32 MByte");
   roms_combo->setCurrentIndex (0);
 
+
   memty_label = new QLabel ("Memory Type:", this);
   labels->addWidget (memty_label);
   memty_combo = new QComboBox (this);
@@ -56,6 +57,7 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
   memty_combo->insertItem (2, "EEPROM");
   memty_combo->setCurrentIndex (0);
 
+
   rsize_label = new QLabel ("RAM Size:", this);
   labels->addWidget (rsize_label);
   rsize_combo = new QComboBox (this);
@@ -64,6 +66,50 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
   rsize_combo->insertItem (1, "512 Kbit");
   rsize_combo->insertItem (2, "1 Mbit");
   rsize_combo->setCurrentIndex (0);
+
+  fct_label = new QLabel ("Flash Type:", this);
+  labels->addWidget(fct_label);
+  fct_combo = new QComboBox (this);
+  combo_boxes->addWidget (fct_combo);
+  fct_combo->insertItem(0, "iG 32KB Cart");
+  fct_combo->insertItem(1, "iG 2MB 128KB SRAM Cart"); //by removing " Cart" it makes the UI move less.
+  fct_combo->insertItem(2, "iG 2MB 32KB FRAM Cart");
+  fct_combo->insertItem(3, "iG 4MB 128KB SRAM Cart");
+  fct_combo->insertItem(4, "32KB AM29F010B");
+  fct_combo->insertItem(5, "32KB SST39SF010A");
+  fct_combo->insertItem(6, "32KB AT49F040");
+  fct_combo->insertItem(7, "512KB SST39SF040");
+  fct_combo->insertItem(8, "1MB ES29LV160");
+  fct_combo->insertItem(9, "2MB BV5");
+  fct_combo->insertItem(10, "2MB AM29LV160DB");
+  fct_combo->insertItem(11, "2MB 29LV160CTTC");
+  fct_combo->insertItem(12, "2MB 29LV160TE");
+  fct_combo->insertItem(13, "2MB AM29F016");
+  fct_combo->insertItem(14, "2MB GB Smart 16M");
+  fct_combo->insertItem(15, "4MB M29W640");
+  fct_combo->insertItem(16, "4MB 29DL32BF");
+  fct_combo->insertItem(17, "4MB MX29LV320");
+  fct_combo->insertItem(18, "4MB S29GL032");
+  fct_combo->insertItem(19, "32MB 256M29");
+  fct_combo->insertItem(20, "32MB M29W256");
+  fct_combo->insertItem(21, "32MB MX29GL256");
+
+  pcb_label = new QLabel ("PCB:", this);
+  labels->addWidget(pcb_label);
+  pcb_combo = new QComboBox (this);
+  combo_boxes->addWidget(pcb_combo);
+
+  we_label = new QLabel ("WE:", this);
+  labels->addWidget(we_label);
+  we_combo = new QComboBox (this);
+  combo_boxes->addWidget(we_combo);
+
+  fct_combo->setVisible(false);
+  fct_label->setVisible(false);
+  pcb_combo->setVisible(false);
+  pcb_label->setVisible(false);
+  we_combo->setVisible(false);
+  we_label->setVisible(false);
 
   GB_check = new QCheckBox (tr ("GB"), this);
   GB_check->setCheckState (Qt::Unchecked);
@@ -91,16 +137,13 @@ Settings::Settings (QWidget * parent):QGroupBox (tr ("Settings"), parent)
 void
 Settings::setCtype (int index)
 {
-    /*
-    for (int i = fct_combo->count() - 1; i >= 0; i--)
-      fct_combo->removeItem (i);
-    combo_boxes->removeWidget(fct_combo);
-    labels->removeWidget(fct_label);
-    combo_boxes->removeWidget(pcb_combo);
-    labels->removeWidget(pcb_label);
-    combo_boxes->removeWidget(we_combo);
-    labels->removeWidget(we_label);
-    */
+
+    fct_combo->setVisible(false);
+    fct_label->setVisible(false);
+    pcb_combo->setVisible(false);
+    pcb_label->setVisible(false);
+    we_combo->setVisible(false);
+    we_label->setVisible(false);
 
     switch (index)
     {
@@ -119,47 +162,14 @@ Settings::setCtype (int index)
         case 4:
           //Flash Cart
           if(GB_check->checkState() == Qt::Checked){
-
-              fct_label = new QLabel ("Flash Chip/Type:", this);
-              labels->addWidget(fct_label);
-              fct_combo = new QComboBox (this);
-              combo_boxes->addWidget (fct_combo);
-              fct_combo->insertItem(0, "iG 32KB Cart");
-              fct_combo->insertItem(1, "iG 2MB 128KB SRAM Cart");
-              fct_combo->insertItem(2, "iG 2MB 32KB FRAM Cart");
-              fct_combo->insertItem(3, "iG 4MB 128KB SRAM Cart");
-              fct_combo->insertItem(4, "32KB AM29F010B");
-              fct_combo->insertItem(5, "32KB SST39SF010A");
-              fct_combo->insertItem(6, "32KB AT49F040");
-              fct_combo->insertItem(7, "512KB SST39SF040");
-              fct_combo->insertItem(8, "1MB ES29LV160");
-              fct_combo->insertItem(9, "2MB BV5");
-              fct_combo->insertItem(10, "2MB AM29LV160DB");
-              fct_combo->insertItem(11, "2MB 29LV160CTTC");
-              fct_combo->insertItem(12, "2MB 29LV160TE");
-              fct_combo->insertItem(13, "2MB AM29F016");
-              fct_combo->insertItem(14, "2MB GB Smart 16M");
-              fct_combo->insertItem(15, "4MB M29W640");
-              fct_combo->insertItem(16, "4MB 29DL32BF");
-              fct_combo->insertItem(17, "4MB MX29LV320");
-              fct_combo->insertItem(18, "4MB S29GL032");
-              fct_combo->insertItem(19, "32MB 256M29");
-              fct_combo->insertItem(20, "32MB M29W256");
-              fct_combo->insertItem(21, "32MB MX29GL256");
-
-              pcb_label = new QLabel ("PCB:", this);
-              labels->addWidget(pcb_label);
-              pcb_combo = new QComboBox (this);
-              combo_boxes->addWidget(pcb_combo);
-
-              we_label = new QLabel ("WE:", this);
-              labels->addWidget(we_label);
-              we_combo = new QComboBox (this);
-              combo_boxes->addWidget(we_combo);
+              fct_combo->setVisible(true);
+              fct_label->setVisible(true);
+              pcb_combo->setVisible(true);
+              pcb_label->setVisible(true);
+              we_combo->setVisible(true);
+              we_label->setVisible(true);
           }
           break;
-
-
     }
 
 }
@@ -249,8 +259,6 @@ Settings::gbToggled ()
 {
     if(GB_check->checkState() == Qt::Checked){
 
-        combo_boxes->removeWidget(memty_combo);
-        labels->removeWidget(memty_label);
 
         Gui::set_mode(VOLTAGE_5V);
         GBA_check->setEnabled(true);
@@ -281,6 +289,9 @@ Settings::gbToggled ()
         roms_combo->insertItem (8, "8 MByte");
         roms_combo->setCurrentIndex (0);
 
+        memty_combo->setVisible(false);
+        memty_label->setVisible(false);
+
         for (int i = rsize_combo->count() - 1; i >= 0; i--)
             rsize_combo->removeItem (i);
 
@@ -304,18 +315,6 @@ Settings::gbaToggled ()
         GBA_check->setEnabled(false);
         GB_check->setCheckState(Qt::Unchecked);
 
-
-        /*
-        for (int i = fct_combo->count() - 1; i >= 0; i--)
-          fct_combo->removeItem (i);
-        combo_boxes->removeWidget(fct_combo);
-        labels->removeWidget(fct_label);
-        combo_boxes->removeWidget(pcb_combo);
-        labels->removeWidget(pcb_label);
-        combo_boxes->removeWidget(we_combo);
-        labels->removeWidget(we_label);
-        */
-
         for (int i = ctype_combo->count() - 1; i >= 0; i--)
           ctype_combo->removeItem (i);
 
@@ -332,8 +331,8 @@ Settings::gbaToggled ()
         roms_combo->insertItem (3, "32 MByte");
         roms_combo->setCurrentIndex (0);
 
-        labels->insertWidget(2, memty_label);
-        combo_boxes->insertWidget(2, memty_combo);
+        memty_combo->setVisible(true);
+        memty_label->setVisible(true);
 
         for (int i = rsize_combo->count() - 1; i >= 0; i--)
             rsize_combo->removeItem (i);
