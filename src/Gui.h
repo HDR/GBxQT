@@ -170,10 +170,9 @@ class Gui:public QWidget
   QPushButton *wflash_btn;
   QPushButton *rram_btn;
   QPushButton *wram_btn;
-  //WriteFlashThread *thread_WFLA;
   ReadFlashThread *thread_RFLA;
   ReadRamThread *thread_RRAM;
-  //EraseThread *thread_E;
+  //WriteFlashThread *thread_WFLA;
   //WriteRamThread * thread_WRAM;
   QString path;
   QString file_name;

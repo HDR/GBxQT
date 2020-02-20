@@ -270,11 +270,11 @@ Settings::gbToggled ()
         for (int i = roms_combo->count() - 1; i >= 0; i--)
           roms_combo->removeItem (i);
 
-        roms_combo->insertItem (0, " 32KByte");
-        roms_combo->insertItem (1, " 64KByte");
-        roms_combo->insertItem (2, " 128KByte");
-        roms_combo->insertItem (3, " 256KByte");
-        roms_combo->insertItem (4, " 512KByte");
+        roms_combo->insertItem (0, "32KByte");
+        roms_combo->insertItem (1, "64KByte");
+        roms_combo->insertItem (2, "128KByte");
+        roms_combo->insertItem (3, "256KByte");
+        roms_combo->insertItem (4, "512KByte");
         roms_combo->insertItem (5, "1 MByte");
         roms_combo->insertItem (6, "2 MByte");
         roms_combo->insertItem (7, "4 MByte");

@@ -120,6 +120,8 @@ Gui::Gui (QWidget * parent):QWidget (parent)
   center->addWidget (wflash_btn);
   center->addWidget (rram_btn);
   center->addWidget (wram_btn);
+  wflash_btn->setEnabled(false);
+  wram_btn->setEnabled(false);
   center->addStretch (1);
   grid->addLayout (center, 0, 1);
   #if defined (_WIN32)
@@ -231,12 +233,12 @@ Gui::setEnabledButtons (bool state)
 {
   status_btn->setEnabled (state);
   rflash_btn->setEnabled (state);
-  wflash_btn->setEnabled (state);
+  wflash_btn->setEnabled (false);
   cancel_btn->setEnabled (!state);
   if (settings->isRamDisabled ())
     state = false;
   rram_btn->setEnabled (state);
-  wram_btn->setEnabled (state);
+  wram_btn->setEnabled (false);
 
 }
 
